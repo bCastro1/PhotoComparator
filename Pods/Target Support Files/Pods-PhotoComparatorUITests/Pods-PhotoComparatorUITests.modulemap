@@ -1,0 +1,6 @@
+framework module Pods_PhotoComparatorUITests {
+  umbrella header "Pods-PhotoComparatorUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}
