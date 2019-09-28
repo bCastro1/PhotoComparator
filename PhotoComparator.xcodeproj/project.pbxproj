@@ -14,10 +14,6 @@
 		D61B4FEC2336B58300B284E2 /* MainScreenCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61B4FEB2336B58300B284E2 /* MainScreenCell.swift */; };
 		D61B4FEE2336B8BE00B284E2 /* MainScreenModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61B4FED2336B8BE00B284E2 /* MainScreenModel.swift */; };
 		D61B4FF02336B91000B284E2 /* MainScreenViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61B4FEF2336B91000B284E2 /* MainScreenViewModel.swift */; };
-		D685AFCA233C69F0002F9784 /* InputTitleHeaderModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D685AFC9233C69F0002F9784 /* InputTitleHeaderModel.swift */; };
-		D685AFCC233C6A5F002F9784 /* InputTitleHeaderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D685AFCB233C6A5F002F9784 /* InputTitleHeaderCell.swift */; };
-		D685AFCE233C6A98002F9784 /* InputTitleHeaderCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = D685AFCD233C6A98002F9784 /* InputTitleHeaderCell.xib */; };
-		D685AFD0233C6C0F002F9784 /* InputTitleHeaderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D685AFCF233C6C0F002F9784 /* InputTitleHeaderViewModel.swift */; };
 		D68A0143233C2182008933D7 /* PhotoComparator.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D68A0141233C2182008933D7 /* PhotoComparator.xcdatamodeld */; };
 		D6988CB323398CDC006A7F8A /* PhotoImportCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = D6988CB223398CDC006A7F8A /* PhotoImportCell.xib */; };
 		D6988CB5233990C3006A7F8A /* PhotoImportCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6988CB4233990C3006A7F8A /* PhotoImportCell.swift */; };
@@ -67,10 +63,6 @@
 		D61B4FEB2336B58300B284E2 /* MainScreenCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainScreenCell.swift; sourceTree = "<group>"; };
 		D61B4FED2336B8BE00B284E2 /* MainScreenModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainScreenModel.swift; sourceTree = "<group>"; };
 		D61B4FEF2336B91000B284E2 /* MainScreenViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainScreenViewModel.swift; sourceTree = "<group>"; };
-		D685AFC9233C69F0002F9784 /* InputTitleHeaderModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputTitleHeaderModel.swift; sourceTree = "<group>"; };
-		D685AFCB233C6A5F002F9784 /* InputTitleHeaderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputTitleHeaderCell.swift; sourceTree = "<group>"; };
-		D685AFCD233C6A98002F9784 /* InputTitleHeaderCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = InputTitleHeaderCell.xib; sourceTree = "<group>"; };
-		D685AFCF233C6C0F002F9784 /* InputTitleHeaderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputTitleHeaderViewModel.swift; sourceTree = "<group>"; };
 		D68A0142233C2182008933D7 /* PhotoComparator.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PhotoComparator.xcdatamodel; sourceTree = "<group>"; };
 		D6988CB223398CDC006A7F8A /* PhotoImportCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PhotoImportCell.xib; sourceTree = "<group>"; };
 		D6988CB4233990C3006A7F8A /* PhotoImportCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoImportCell.swift; sourceTree = "<group>"; };
@@ -153,17 +145,6 @@
 			path = MainScreen;
 			sourceTree = "<group>";
 		};
-		D685AFC8233C69BA002F9784 /* Input Header */ = {
-			isa = PBXGroup;
-			children = (
-				D685AFC9233C69F0002F9784 /* InputTitleHeaderModel.swift */,
-				D685AFCB233C6A5F002F9784 /* InputTitleHeaderCell.swift */,
-				D685AFCD233C6A98002F9784 /* InputTitleHeaderCell.xib */,
-				D685AFCF233C6C0F002F9784 /* InputTitleHeaderViewModel.swift */,
-			);
-			path = "Input Header";
-			sourceTree = "<group>";
-		};
 		D6988CB123398BF0006A7F8A /* PhotoUpload */ = {
 			isa = PBXGroup;
 			children = (
@@ -171,7 +152,6 @@
 				D6988CB4233990C3006A7F8A /* PhotoImportCell.swift */,
 				D69F5B7623346065001FDBC6 /* PicturedObject.swift */,
 				D6988CB623399232006A7F8A /* PhotoImportViewModel.swift */,
-				D685AFC8233C69BA002F9784 /* Input Header */,
 			);
 			path = PhotoUpload;
 			sourceTree = "<group>";
@@ -397,7 +377,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D685AFCE233C6A98002F9784 /* InputTitleHeaderCell.xib in Resources */,
 				D69F5B8223347DDB001FDBC6 /* ionicons.ttf in Resources */,
 				D69F5B8323347DDB001FDBC6 /* ionicons.bundle in Resources */,
 				D61B4FE92336B43A00B284E2 /* MainScreenCell.xib in Resources */,
@@ -514,14 +493,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D685AFCA233C69F0002F9784 /* InputTitleHeaderModel.swift in Sources */,
-				D685AFD0233C6C0F002F9784 /* InputTitleHeaderViewModel.swift in Sources */,
 				D69F5B4123345BB4001FDBC6 /* AppDelegate.swift in Sources */,
 				D61B4FF02336B91000B284E2 /* MainScreenViewModel.swift in Sources */,
 				D69F5B8123347DDB001FDBC6 /* ionicon.swift in Sources */,
 				D61B4FEE2336B8BE00B284E2 /* MainScreenModel.swift in Sources */,
 				D69F5B8623348239001FDBC6 /* PhotoImportVC.swift in Sources */,
-				D685AFCC233C6A5F002F9784 /* InputTitleHeaderCell.swift in Sources */,
 				D6988CB723399232006A7F8A /* PhotoImportViewModel.swift in Sources */,
 				D68A0143233C2182008933D7 /* PhotoComparator.xcdatamodeld in Sources */,
 				D69F5B7123345D37001FDBC6 /* Extensions.swift in Sources */,

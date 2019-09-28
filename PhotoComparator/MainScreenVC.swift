@@ -24,6 +24,8 @@ class MainScreenVC: CollectionViewController {
 
     var photoArray: Array<MainScreenModel> = []
     var ckRecordIDs: [NSManagedObject] = []
+    var photoNameRecords: [NSManagedObject] = []
+    var photoNameDictionary:[String:String] = [:]
     
     override func viewDidLoad() {
         
@@ -35,52 +37,63 @@ class MainScreenVC: CollectionViewController {
         
         importPhotoButton()
 
-        
-        //fetchRecordFromCloud("590980952")
-        //saveCKRecordID(ckRecordID: "590980952")
-        
+    
     }
+    
+    //MARK: Retrieving Core Data Info
     
     override func viewWillAppear(_ animated: Bool){
         super.viewWillAppear(animated)
-        
+        getImageReferenceForFolderFromCoreData()
+
+    }
+    
+    func getImageReferenceForFolderFromCoreData(){
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
         let managedContext = appDelegate.persistentContainer.viewContext
         let fetchRequest = NSFetchRequest<NSManagedObject>(entityName:"CloudKitRecord")
         do {
-            print("Core Data objects obtained.")
+            print("Core Data objects obtained: CKRecord References")
             ckRecordIDs = try managedContext.fetch(fetchRequest)
+
+            self.getTitleInfoForFoldersFromCoreData()
+            
+        } catch let error as NSError {
+            print("Error fetching CoreData: \(error.localizedDescription)")
+        }
+    }
+    
+    func getTitleInfoForFoldersFromCoreData(){
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+        let managedContext = appDelegate.persistentContainer.viewContext
+        let fetchRequest = NSFetchRequest<NSManagedObject>(entityName:"CollectionNameUID")
+        do {
+            print("Core Data objects obtained: Title info")
+            photoNameRecords = try managedContext.fetch(fetchRequest)
+            setDictionaryForRecordNames(photoNameRecords)
             self.fetchRecordFromCloud(ckRecordIDs)
         } catch let error as NSError {
             print("Error fetching CoreData: \(error.localizedDescription)")
         }
     }
     
-    
-    func saveCKRecordID(ckRecordID: String){
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
-        let managedContext = appDelegate.persistentContainer.viewContext
-        //getting CKRecordID context from core data
-        let entity = NSEntityDescription.entity(forEntityName: "CloudKitRecord", in: managedContext)!
-        //setting value of passed string to CKRecordID.id in core data
-        let recordID = NSManagedObject(entity: entity, insertInto: managedContext)
-        recordID.setValue(ckRecordID, forKey: "id")
-        
-        do {
-          try managedContext.save()
-            ckRecordIDs.append(recordID)
-            print("Core data object saved.")
-        } catch let error as NSError {
-          print("Could not save. \(error), \(error.userInfo)")
+    func setDictionaryForRecordNames(_ CKRecordIdentifiers: [NSManagedObject]){
+        for records in photoNameRecords {
+            guard let collectionName = records.value(forKey: "name") as? String else {return}
+            guard let collectionUID = records.value(forKey: "uid") as? String else {return}
+            photoNameDictionary[collectionUID] = collectionName
         }
+        
     }
+    
+    //MARK: Fetch Data From CloudKit
     
     func fetchRecordFromCloud(_ CKRecordIdentifiers: [NSManagedObject]){
         let container = CKContainer.init(identifier: "iCloud.victoryCloud.PhotoComparator")
         let privateDatabase = container.privateCloudDatabase
         
         for records in CKRecordIdentifiers {
-            guard let recordName = records.value(forKeyPath: "id") as? String else {return}
+            guard let recordName = records.value(forKey: "id") as? String else {return}
             let ckRecordID = CKRecord.ID(recordName: recordName)
             privateDatabase.fetch(withRecordID: ckRecordID) { (result, error) -> Void in
                 if (error != nil){
@@ -88,11 +101,11 @@ class MainScreenVC: CollectionViewController {
                 }
                 else {
                     guard let record = result else {return}
-                    print("record id?: \(record.recordID)")
                     let imageAsset: CKAsset = record.value(forKey: "photo") as! CKAsset
                     let image = UIImage(contentsOfFile: imageAsset.fileURL!.path)
-                    let name = record.value(forKey: "name") as? String
-                    self.photoArray.append(MainScreenModel(name: name!, image: image!))
+                    let id = record.value(forKey: "id") as? String
+                    guard let collectionName = self.photoNameDictionary[id!] else {return}
+                    self.photoArray.append(MainScreenModel(name: "\(collectionName)", image: image!, nameIdentifier: id!))
                 }
                 OperationQueue.main.addOperation { () -> Void in
                     self.setFetchedDataToCells()
@@ -102,13 +115,15 @@ class MainScreenVC: CollectionViewController {
         }
     }
     
+    //MARK: Cell Setup
+    
     func setFetchedDataToCells(){
         
         let grid = Grid(columns: 2, margin: UIEdgeInsets(horizontal: 0, vertical: 25), padding: .zero)
         let items = photoArray.map { [weak self] photoArray in
             MainScreenViewModel(photoArray)
                 .onSelect { [weak self] viewModel in
-                    print("name: \(viewModel.model.name)")
+                    print("id: \(viewModel.model.nameIdentifier)")
             }
         }
         
@@ -118,7 +133,7 @@ class MainScreenVC: CollectionViewController {
     }
     
     
-    
+    //MARK: Import Button Setup
     
     func importPhotoButton(){
         let addButton = UIBarButtonItem(title: ionicon.Plus.rawValue, style: .plain, target: self, action: #selector(addPhotoAction))
@@ -133,35 +148,75 @@ class MainScreenVC: CollectionViewController {
         self.navigationController?.pushViewController(PhotoImportVC(), animated: true)
     }
     
-    func getMainPageFolders(){
-        let container = CKContainer.default()
+    //MARK: Development Functions
+    
+    func getALLMainPageFolders(){
+        let container = CKContainer.init(identifier: "iCloud.victoryCloud.PhotoComparator")
         let privateDatabase = container.privateCloudDatabase
         let predicate = NSPredicate(value: true)
         let query = CKQuery(recordType: "PicturedObject", predicate: predicate)
-        
-        privateDatabase.perform(query, inZoneWith: nil) { (results, error) -> Void in
+
+        privateDatabase.perform(query, inZoneWith: nil) { (result, error) -> Void in
             if error != nil {
                 print(error?.localizedDescription as Any)
-                
-                //hud.hide(for: self.view, animated: true)
             }
             else {
-                //print(results)
-                
-//                for result in results! {
-//                    self.arrayDetails.append(result)
-//                }
-                
-                OperationQueue.main.addOperation({ () -> Void in
-                    //self.tableView.reloadData()
-                    //self.tableView.isHidden = false
-                    //Progress.hide(for: self.view, animated: true)
-                })
+                for record in result! {
+                        let imageAsset: CKAsset = record.value(forKey: "photo") as! CKAsset
+                        let image = UIImage(contentsOfFile: imageAsset.fileURL!.path)
+                    let id = record.recordID.recordName
+                    self.photoArray.append(MainScreenModel(name: " ", image: image!, nameIdentifier: id))
+                    }
+                }
+                OperationQueue.main.addOperation { () -> Void in
+                    self.setFetchedDataToCells()
+                    self.collectionView.reloadData()
+                }
             }
         }
-    }
+    
+        func foo(_ f: [NSManagedObject]){
+    //        let recordsToAdd = ["591314508-3","591318838-0)","591312320","591313280-3"]
+    //
+    //        for record in recordsToAdd {
+    //        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+    //        let managedContext = appDelegate.persistentContainer.viewContext
+    //        //getting CKRecordID context from core data
+    //        let entity = NSEntityDescription.entity(forEntityName: "CloudKitRecord", in: managedContext)!
+    //        //setting value of passed string to CKRecordID.id in core data
+    //            let valueToStore = NSManagedObject(entity: entity, insertInto: managedContext)
+    //            valueToStore.setValue(record, forKey: "id")
+    //
+    //            do {
+    //              try managedContext.save()
+    //                ckRecordIDs.append(valueToStore)
+    //                print("Core data object saved: \(record)")
+    //            } catch let error as NSError {
+    //              print("Could not save. \(error), \(error.userInfo)")
+    //
+    //            }}
 
-
+            for record in f {
+                if let name = record.value(forKey: "id") as? String {
+                    print("name: \(name)")
+                }
+            }
+            
+    //        for items in f {
+    //        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+    //        let managedContext = appDelegate.persistentContainer.viewContext
+    //        managedContext.delete(items)
+    //
+    //        do {
+    //            try managedContext.save()
+    //        } catch _ {
+    //            }}
+        }
+    
+    
 }
+
+
+
 
 

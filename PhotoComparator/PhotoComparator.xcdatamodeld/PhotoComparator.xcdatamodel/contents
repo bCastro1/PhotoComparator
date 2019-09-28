@@ -3,7 +3,12 @@
     <entity name="CloudKitRecord" representedClassName="CloudKitRecord" syncable="YES" codeGenerationType="class">
         <attribute name="id" optional="YES" attributeType="String"/>
     </entity>
+    <entity name="CollectionNameUID" representedClassName="CollectionNameUID" syncable="YES" codeGenerationType="class">
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="uid" optional="YES" attributeType="String"/>
+    </entity>
     <elements>
         <element name="CloudKitRecord" positionX="-63" positionY="-18" width="128" height="58"/>
+        <element name="CollectionNameUID" positionX="-63" positionY="-9" width="128" height="73"/>
     </elements>
 </model>

@@ -37,3 +37,10 @@ extension NSDate {
         return stringDate
     }
 }
+
+extension Collection where Element: Equatable {
+    func indexDistance(of element: Element) -> Int? {
+        guard let index = firstIndex(of: element) else { return nil }
+        return distance(from: startIndex, to: index)
+    }
+}

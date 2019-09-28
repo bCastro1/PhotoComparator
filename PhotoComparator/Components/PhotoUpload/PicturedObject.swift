@@ -11,9 +11,8 @@ import UIKit
 
 struct PicturedObject {
     
-    var name: NSString
     var date: NSDate
     var photo: UIImage
-    var id: NSNumber
-    
+    var id: NSString
+
 }

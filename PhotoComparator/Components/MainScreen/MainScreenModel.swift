@@ -12,4 +12,5 @@ import UIKit
 struct MainScreenModel {
     let name: String
     let image: UIImage
+    let nameIdentifier: String
 }
