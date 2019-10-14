@@ -12,5 +12,6 @@ import UIKit
 struct MainScreenModel {
     let name: String
     let image: UIImage
-    let nameIdentifier: String
+    let id: String
+    var date: NSDate
 }

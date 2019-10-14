@@ -38,9 +38,29 @@ extension NSDate {
     }
 }
 
-extension Collection where Element: Equatable {
-    func indexDistance(of element: Element) -> Int? {
-        guard let index = firstIndex(of: element) else { return nil }
-        return distance(from: startIndex, to: index)
+extension CATransition {
+    
+    func pushFromLeft() -> CATransition {
+        self.duration = 0.25
+        self.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
+        self.type = CATransitionType.moveIn
+        self.subtype = CATransitionSubtype.fromLeft
+        return self
+    }
+    
+    func popFromTop() -> CATransition {
+        self.duration = 0.25
+        self.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
+        self.type = CATransitionType.reveal
+        self.subtype = CATransitionSubtype.fromTop
+        return self
+    }
+    
+    func popFromBottom() -> CATransition {
+        self.duration = 0.25
+        self.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
+        self.type = CATransitionType.reveal
+        self.subtype = CATransitionSubtype.fromBottom
+        return self
     }
 }
