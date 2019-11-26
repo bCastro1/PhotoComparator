@@ -5,10 +5,12 @@ PODS:
     - BSImageView (= 1.0.3)
   - BSImageView (1.0.3)
   - CollectionView (2.0.1)
+  - ImageScrollView (1.8)
 
 DEPENDENCIES:
   - BSImagePicker (~> 2.8)
   - CollectionView (~> 2.0.0)
+  - ImageScrollView (from `https://github.com/huynguyencong/ImageScrollView.git`)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -18,12 +20,22 @@ SPEC REPOS:
   https://github.com/CoreKit/CocoaPods.git:
     - CollectionView
 
+EXTERNAL SOURCES:
+  ImageScrollView:
+    :git: https://github.com/huynguyencong/ImageScrollView.git
+
+CHECKOUT OPTIONS:
+  ImageScrollView:
+    :commit: aea864b221423dc8fd375b5997f110f1008e6dbd
+    :git: https://github.com/huynguyencong/ImageScrollView.git
+
 SPEC CHECKSUMS:
   BSGridCollectionViewLayout: 333dcb457a5a3bdd9212607ab5756553dcfe06cb
   BSImagePicker: f7228c1e1abc1fa850248fd0e8018e0ccc19148a
   BSImageView: a149459433a2687157d034c78e059d30ac7f2544
   CollectionView: 6ae68f03a9a1e0a4d5932423e18a7b5501599492
+  ImageScrollView: 82912273486297285682bdb2a806742f0d39940c
 
-PODFILE CHECKSUM: de75a0e470bb183c970330660cae0376931d3eb9
+PODFILE CHECKSUM: 0d1ba7dc73895df34d651c86213d1a215dd0e1d9
 
 COCOAPODS: 1.7.5

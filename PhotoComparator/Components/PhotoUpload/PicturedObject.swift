@@ -13,6 +13,6 @@ struct PicturedObject {
     
     var date: NSDate
     var photo: UIImage
-    var id: NSString
+    var id: NSString 
 
 }

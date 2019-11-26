@@ -14,4 +14,5 @@ struct MainScreenModel {
     let image: UIImage
     let id: String
     var date: NSDate
+    let nameUID: String
 }

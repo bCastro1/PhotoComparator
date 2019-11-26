@@ -9,8 +9,28 @@
 import Foundation
 import UIKit
 
+//MARK: UIColor
 extension UIColor {
     static let defaultTint = UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1)
+    
+    @available(iOS 13.0, *)
+    static let dynamicBackgroundColor = UIColor { (traitCollection: UITraitCollection) -> UIColor in
+            switch traitCollection.userInterfaceStyle {
+            case .unspecified, .light: return UIColor(red: 220/255, green: 220/255, blue: 220/255, alpha: 1.0)
+            case .dark: return UIColor(red: 40/255, green: 40/255, blue: 40/255, alpha: 1.0)
+            @unknown default:
+                fatalError()
+        }
+    }
+    @available(iOS 13.0, *)
+    static let dynamicTextColor = UIColor { (traitCollection: UITraitCollection) -> UIColor in
+            switch traitCollection.userInterfaceStyle {
+            case .unspecified, .light: return UIColor(red: 40/255, green: 40/255, blue: 40/255, alpha: 1.0)
+            case .dark: return UIColor(red: 220/255, green: 220/255, blue: 220/255, alpha: 1.0)
+            @unknown default:
+                fatalError()
+            }
+        }
 }
 
 
@@ -22,6 +42,7 @@ func showSimpleAlertWithTitle(_ title: String!, message: String, viewController:
     viewController.present(alert, animated: true, completion: nil)
 }
 
+//MARK: NSDate
 extension NSDate {
     func formatDate() -> String {
         let formatter = DateFormatter()
@@ -38,6 +59,21 @@ extension NSDate {
     }
 }
 
+public func <(lhs: NSDate, rhs: NSDate) -> Bool {
+    return lhs.compare(rhs as Date) == .orderedAscending
+}
+public func timeFrom(lhs: NSDate, rhs: NSDate) -> String {
+    let formatter = DateComponentsFormatter()
+    formatter.unitsStyle = .full
+    formatter.allowedUnits = [.year,.month,.day]
+    return formatter.string(from: lhs as Date, to: rhs as Date)!
+}
+
+extension NSDate: Comparable { }
+
+
+
+//MARK:  CATransition
 extension CATransition {
     
     func pushFromLeft() -> CATransition {
@@ -64,3 +100,51 @@ extension CATransition {
         return self
     }
 }
+
+//MARK: NavigationController
+extension UINavigationController {
+    func popViewControllers(controllersToPop: Int, animated: Bool) {
+        if viewControllers.count > controllersToPop {
+            popToViewController(viewControllers[viewControllers.count - (controllersToPop + 1)], animated: animated)
+        } else {
+            print("Trying to pop \(controllersToPop) view controllers but navigation controller contains only \(viewControllers.count) controllers in stack")
+        }
+    }
+}
+
+//MARK: ViewController
+extension UIViewController {
+    func hideKeyboardWhenTappedAround() {
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+    }
+    
+    func hideKeyboardWhenDragging(){
+        let pan: UIPanGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
+        pan.cancelsTouchesInView = false
+        view.addGestureRecognizer(pan)
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+}
+
+
+//MARK: UserDefaults
+let kSelectedStorageType = "UserSelectedStorageType"
+
+extension UserDefaults{
+    //default user selected storage type
+    //MARK: Check Login
+    func setDefaultStorageType(value: String) {
+        set(value, forKey: kSelectedStorageType)
+    }
+    
+    //MARK: Retrieve storage type
+    func getDefaultStorageType() -> String{
+        return string(forKey: kSelectedStorageType) ?? "Local"
+    }
+}
+

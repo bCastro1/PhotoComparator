@@ -2,6 +2,18 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:PhotoComparator/Service Files/Core Data Operations/CollectionNameInfo+CoreDataClass.swift">
+   </FileRef>
+   <FileRef
+      location = "group:PhotoComparator/Service Files/Core Data Operations/CollectionNameInfo+CoreDataProperties.swift">
+   </FileRef>
+   <FileRef
+      location = "group:PhotoComparator/Service Files/Core Data Operations/FullResolution+CoreDataClass.swift">
+   </FileRef>
+   <FileRef
+      location = "group:PhotoComparator/Service Files/Core Data Operations/FullResolution+CoreDataProperties.swift">
+   </FileRef>
+   <FileRef
       location = "group:PhotoComparator.xcodeproj">
    </FileRef>
    <FileRef

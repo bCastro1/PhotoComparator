@@ -16,7 +16,11 @@ class HeaderCell: Cell {
         super.awakeFromNib()
         
         self.titleLabel.font = UIFont.systemFont(ofSize: 24, weight: .heavy)
-        self.titleLabel.textColor = .black
+        if #available(iOS 13.0, *) {
+            self.titleLabel.textColor = UIColor.dynamicTextColor
+        } else {
+            self.titleLabel.textColor = UIColor.black
+        }
     }
     
     override func reset() {

@@ -17,10 +17,13 @@ class MainScreenCell: Cell {
     override func awakeFromNib() {
         super.awakeFromNib()
         
-        self.textLabel.font = UIFont.systemFont(ofSize: 12, weight: .bold)
-        self.textLabel.textColor = .black
         
-        self.imageView.backgroundColor = UIColor.lightGray
+        if #available(iOS 13.0, *) {
+            self.textLabel.textColor = UIColor.dynamicTextColor
+        } else {
+            self.textLabel.textColor = UIColor.black
+        }
+        self.imageView.backgroundColor = UIColor.gray
         self.imageView.layer.cornerRadius = 8
         self.imageView.layer.masksToBounds = true
     }

@@ -21,7 +21,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string></string>
+	<string>Allow access to camera roll in order to upload and save photos from your libarary. </string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>ionicons.tff</string>

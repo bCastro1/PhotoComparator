@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="15508" systemVersion="18G84" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="CollectionNameInfo" representedClassName="CollectionNameInfo" syncable="YES" codeGenerationType="class">
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="nameUID" optional="YES" attributeType="String"/>
+        <attribute name="pictureID" optional="YES" attributeType="String"/>
+        <relationship name="collectionName" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="FullResolution" inverseName="pictureName" inverseEntity="FullResolution"/>
+    </entity>
+    <entity name="FullResolution" representedClassName="FullResolution" syncable="YES" codeGenerationType="class">
+        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <attribute name="imageData" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
+        <attribute name="nameUID" optional="YES" attributeType="String"/>
+        <relationship name="pictureName" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CollectionNameInfo" inverseName="collectionName" inverseEntity="CollectionNameInfo"/>
+    </entity>
+    <elements>
+        <element name="CollectionNameInfo" positionX="-360.80078125" positionY="71.8359375" width="128" height="103"/>
+        <element name="FullResolution" positionX="-88.76171875" positionY="67.1796875" width="129.2578125" height="118"/>
+    </elements>
+</model>

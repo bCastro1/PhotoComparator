@@ -10,6 +10,7 @@ target 'PhotoComparator' do
 	pod "BSImagePicker", "~> 2.8"
 	source 'https://github.com/CoreKit/CocoaPods.git'
 	pod 'CollectionView', '~> 2.0.0'
+	pod 'ImageScrollView', :git => 'https://github.com/huynguyencong/ImageScrollView.git'
 
   target 'PhotoComparatorTests' do
     inherit! :search_paths
