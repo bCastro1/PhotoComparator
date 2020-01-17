@@ -7,38 +7,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "7929D96E-CDE4-43F7-A099-8890BFFA8006"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PhotoComparator/PhotoCollectionVC.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "282"
-            endingLineNumber = "282"
-            landmarkName = "collectionOptionsButton()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "E2C1A4A0-78F9-4C17-87ED-B5157AB06B1E"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PhotoComparator/PhotoImportVC.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "315"
-            endingLineNumber = "315"
-            landmarkName = "pageCompletionCheck_ExistingCollection()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "063916EA-F3FA-4AE3-B4AF-AC5A18BD5425"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -46,8 +14,8 @@
             filePath = "PhotoComparator/MainScreenVC.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "121"
-            endingLineNumber = "121"
+            startingLineNumber = "115"
+            endingLineNumber = "115"
             landmarkName = "getCKCollectionFolderInfo()"
             landmarkType = "7">
          </BreakpointContent>
@@ -62,90 +30,154 @@
             filePath = "PhotoComparator/PhotoImportVC.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "344"
-            endingLineNumber = "344"
-            landmarkName = "pageCompletionCheck_SinglePhotoUpload()"
+            startingLineNumber = "413"
+            endingLineNumber = "413"
+            landmarkName = "pageCompletionCheck_ExistingCollection()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "622AC83F-20F6-4340-89B3-38CEC590BCDA"
+            uuid = "608363DC-E4B0-41D8-80DF-500FE327F414"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "PhotoComparator/PhotoCollectionVC.swift"
+            filePath = "PhotoComparator/Service Files/CloudKitOperations/CloudKitFunctions.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "186"
-            endingLineNumber = "186"
-            landmarkName = "fetchRecordFromCloud()"
+            startingLineNumber = "189"
+            endingLineNumber = "189"
+            landmarkName = "updateFolderName(newFolderName:folderToUpdate:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "C9827B70-4887-4FC0-8F05-C56B2A687EC5"
+            uuid = "E5F3DEB5-11C2-406A-9ECD-C6E22735D8D5"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "PhotoComparator/Service Files/Core Data Operations/CoreDataFunctions.swift"
+            filePath = "PhotoComparator/Service Files/CloudKitOperations/CloudKitFunctions.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "64"
-            endingLineNumber = "64"
-            landmarkName = "savePicturedObjectCollection(photoObjectArray:nameUID:)"
+            startingLineNumber = "216"
+            endingLineNumber = "216"
+            landmarkName = "getMainPageFolders(completionHandler:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "E5F3DEB5-11C2-406A-9ECD-C6E22735D8D5 - 366cdf8bc97e7367"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Optional&lt;Swift.Array&lt;__C.CKRecord&gt;&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in PhotoComparator.CloudKitFunctions.getMainPageFolders(completionHandler: (Swift.Optional&lt;Swift.Array&lt;PhotoComparator.CollectionFolderModel&gt;&gt;) -&gt; ()) -&gt; ()"
+                  moduleName = "PhotoComparator"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/brendanc/Desktop/PhotoComparator/PhotoComparator/Service%20Files/CloudKitOperations/CloudKitFunctions.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "216"
+                  endingLineNumber = "216"
+                  offsetFromSymbolStart = "3353">
+               </Location>
+               <Location
+                  uuid = "E5F3DEB5-11C2-406A-9ECD-C6E22735D8D5 - ad1f935c205481e6"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (PhotoComparator.CollectionFolderModel) -&gt; Swift.Bool in closure #1 (Swift.Optional&lt;Swift.Array&lt;__C.CKRecord&gt;&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in PhotoComparator.CloudKitFunctions.getMainPageFolders(completionHandler: (Swift.Optional&lt;Swift.Array&lt;PhotoComparator.CollectionFolderModel&gt;&gt;) -&gt; ()) -&gt; ()"
+                  moduleName = "PhotoComparator"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/brendanc/Desktop/PhotoComparator/PhotoComparator/Service%20Files/CloudKitOperations/CloudKitFunctions.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "216"
+                  endingLineNumber = "216"
+                  offsetFromSymbolStart = "61">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "CDDE9D27-C21C-4AE1-B0F8-54CCA370D039"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PhotoComparator/MainScreenVC.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "112"
+            endingLineNumber = "112"
+            landmarkName = "getCKCollectionFolderInfo()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "CDDE9D27-C21C-4AE1-B0F8-54CCA370D039 - 62e49d209c8d98d9"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Optional&lt;Swift.Array&lt;PhotoComparator.CollectionFolderModel&gt;&gt;) -&gt; () in PhotoComparator.MainScreenVC.getCKCollectionFolderInfo() -&gt; ()"
+                  moduleName = "PhotoComparator"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/brendanc/Desktop/PhotoComparator/PhotoComparator/MainScreenVC.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "112"
+                  endingLineNumber = "112"
+                  offsetFromSymbolStart = "205">
+               </Location>
+               <Location
+                  uuid = "CDDE9D27-C21C-4AE1-B0F8-54CCA370D039 - b9e7e89d13c432a1"
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Optional&lt;Swift.Array&lt;PhotoComparator.MainScreenModel&gt;&gt;) -&gt; () in closure #1 (Swift.Optional&lt;Swift.Array&lt;PhotoComparator.CollectionFolderModel&gt;&gt;) -&gt; () in PhotoComparator.MainScreenVC.getCKCollectionFolderInfo() -&gt; ()"
+                  moduleName = "PhotoComparator"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/brendanc/Desktop/PhotoComparator/PhotoComparator/MainScreenVC.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "113"
+                  endingLineNumber = "113"
+                  offsetFromSymbolStart = "106">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B058A070-EF44-4768-AA19-A44FF325A964"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PhotoComparator/Service Files/CloudKitOperations/CloudKitFunctions.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "256"
+            endingLineNumber = "256"
+            landmarkName = "getCollectionFolderRecords(_:completionHandler:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "5A15A07C-1C5A-4BEE-95CD-FB3E15B541A3"
+            uuid = "7D4960F0-A063-4E63-BAAB-1E2E34F93F42"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "PhotoComparator/Service Files/Core Data Operations/CoreDataFunctions.swift"
+            filePath = "PhotoComparator/PhotoImportVC.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "78"
-            endingLineNumber = "78"
-            landmarkName = "prepareImageForCoreData(picture:pictureID:nameUID:idx:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "7AE0F1A1-66DB-495A-9CC3-615E66D43540"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PhotoComparator/Service Files/Core Data Operations/CoreDataFunctions.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "97"
-            endingLineNumber = "97"
-            landmarkName = "savePicturedObject(pictureID:nameUID:imageData:date:idx:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "1EF34C7C-9E08-4885-89E2-217EA147B34B"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "PhotoComparator/Service Files/Core Data Operations/CoreDataFunctions.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "99"
-            endingLineNumber = "99"
-            landmarkName = "savePicturedObject(pictureID:nameUID:imageData:date:idx:)"
-            landmarkType = "7">
+            startingLineNumber = "174"
+            endingLineNumber = "174"
+            landmarkName = "PhotoImportVC"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

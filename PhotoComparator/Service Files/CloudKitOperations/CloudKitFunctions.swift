@@ -20,6 +20,8 @@ class CloudKitFunctions {
     var firstObjectTimestampIDforCoreData:String = "" //setting uid for use with core data
     var ckErrorHandle = CloudKitError()
     
+    var delegate: CoreDataSaveProtocol! //upload progress bar protocol
+    
     typealias CompletionHandler = (_ success:Bool) -> Void
     //, completionHandler:@escaping (_ completed: Bool)-> Void
     
@@ -101,6 +103,7 @@ class CloudKitFunctions {
                 }
             }
             else {
+                self.delegate.saveProgess(progressInt: index)
                 print("CK Save Success")
             }
         }
@@ -168,6 +171,28 @@ class CloudKitFunctions {
         }
     }
     
+    //MARK: Update collection folder name
+    func updateFolderName(newFolderName: String, folderToUpdate: CKRecord){
+        
+        let updatedFolder = folderToUpdate
+        updatedFolder.setObject(newFolderName as NSString, forKey: "name")
+    
+        let container = CKContainer.init(identifier: "iCloud.victoryCloud.PhotoComparator")
+        let privateDatabase = container.privateCloudDatabase
+
+        privateDatabase.save(updatedFolder) { (record, error) -> Void in
+            if let error = error{
+                if let ckError = error as? CKError {
+                    self.ckErrorHandle.handle_CKError(ckError: ckError.code)
+                }
+            }
+            else {
+                print("ColelctionFolder CK Name UPDATE Success")
+            }
+        }
+    }
+
+    
     //MARK: Get Main Page Folders
     
     func getMainPageFolders(completionHandler:@escaping (_ collectionFolders: [CollectionFolderModel]?)-> Void){
@@ -184,13 +209,13 @@ class CloudKitFunctions {
            }
            else {
                for result in results! {
-                guard let nameUID = result.value(forKey: "nameUID") as? NSString else {print("1"); return}
-                guard let name = result.value(forKey: "name") as? NSString else {print("2"); return}
-                guard let recordID = result.value(forKey: "picturedObjectRecordID") as? NSString else {print("3"); return}
+                    guard let nameUID = result.value(forKey: "nameUID") as? NSString else {return}
+                    guard let name = result.value(forKey: "name") as? NSString else {return}
+                    guard let recordID = result.value(forKey: "picturedObjectRecordID") as? NSString else {return}
 
                     if !(self.collectionFolderArray.contains(where: {$0.nameUID == nameUID})){
                         //unique records only
-                        let folder = CollectionFolderModel(name: name, nameUID: nameUID, picturedObjectRecordID: recordID)
+                        let folder = CollectionFolderModel(name: name, nameUID: nameUID, picturedObjectRecordID: recordID, cKRecord: result)
                         self.collectionFolderArray.append(folder)
                     }
                 }
@@ -228,7 +253,7 @@ class CloudKitFunctions {
                         let imageAsset: CKAsset = result.value(forKey: "photo") as! CKAsset
                         let image = UIImage(contentsOfFile: imageAsset.fileURL!.path)
                         let date = result.value(forKey: "date") as? NSDate
-                        self.photoArray.append(MainScreenModel(name: name, image: image!, id: id, date: date!, nameUID: ""))
+                        self.photoArray.append(MainScreenModel(name: name, image: image!, id: id, date: date!, nameUID: id))
                     }
                 }
             completionHandler(self.photoArray)

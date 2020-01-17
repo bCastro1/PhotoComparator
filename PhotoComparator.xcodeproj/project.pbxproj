@@ -217,10 +217,10 @@
 		D65525B123482FB7002F70F2 /* Service Files */ = {
 			isa = PBXGroup;
 			children = (
-				D69F5B7023345D37001FDBC6 /* Extensions.swift */,
-				D6DC03EC236CF33800D444EC /* TextMessageComposer.swift */,
 				D6D51386235A556300F90274 /* CloudKitOperations */,
 				D682D7552373967B00C6D9BA /* Core Data Operations */,
+				D69F5B7023345D37001FDBC6 /* Extensions.swift */,
+				D6DC03EC236CF33800D444EC /* TextMessageComposer.swift */,
 				D6322C5B23610BF70071088D /* Crop */,
 			);
 			path = "Service Files";

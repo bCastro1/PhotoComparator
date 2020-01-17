@@ -45,7 +45,6 @@ class ViewPhotoModeVC: UIViewController, UIGestureRecognizerDelegate {
         
         viewPhoto_View.isUserInteractionEnabled = true
     
-        //let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(zoomImageWithPinch))
 
         let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(swipeAction))
         rightSwipe.direction = .right
@@ -55,65 +54,21 @@ class ViewPhotoModeVC: UIViewController, UIGestureRecognizerDelegate {
         upSwipe.direction = .up
         let downSwipe = UISwipeGestureRecognizer(target: self, action: #selector(swipeAction))
         downSwipe.direction = .down
+
+        viewPhoto_View.imageView.enableZoom()
+        //MARK: zoom
         
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panImage))
-        
-        //pinchGesture.delegate = self
-        panGesture.delegate = self
-        //viewPhoto_View.addGestureRecognizer(pinchGesture)
-        viewPhoto_View.addGestureRecognizer(panGesture)
         viewPhoto_View.addGestureRecognizer(rightSwipe)
         viewPhoto_View.addGestureRecognizer(leftSwipe)
         viewPhoto_View.addGestureRecognizer(upSwipe)
         viewPhoto_View.addGestureRecognizer(downSwipe)
+        
 
         viewPhoto_View.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(exitToggle)))
         viewPhoto_View.exitButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(exitPhotoView)))
         
     }
-        
-    
-    
-    //MARK: Zooming with pinch
-    @objc func zoomImageWithPinch(_ gesture : UIPinchGestureRecognizer){
-        if gesture.state == .began {
-        let currentScale = self.viewPhoto_View.scrollView.frame.size.width / self.viewPhoto_View.scrollView.bounds.size.width
-            let newScale = currentScale*gesture.scale
-            if newScale > 1 {
-                self.isZooming = true
-            }
-        }
-        else if gesture.state == .changed {
-            guard let view = gesture.view else {return}
-            let pinchCenter = CGPoint(x: gesture.location(in: view).x - view.bounds.midX,
-                                      y: gesture.location(in: view).y - view.bounds.midY)
-            let transform = view.transform.translatedBy(x: pinchCenter.x, y: pinchCenter.y)
-                .scaledBy(x: gesture.scale, y: gesture.scale)
-                .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
-            let currentScale = self.viewPhoto_View.scrollView.frame.size.width / self.viewPhoto_View.scrollView.bounds.size.width
-            var newScale = currentScale*gesture.scale
-            if newScale < 1 {
-                newScale = 1
-                let transform = CGAffineTransform(scaleX: newScale, y: newScale)
-                self.viewPhoto_View.scrollView.transform = transform
-                gesture.scale = 1
-            }
-            else {
-                view.transform = transform
-                gesture.scale = 1
-            }
-        }
-        else if (gesture.state == .ended  || gesture.state == .failed || gesture.state == .cancelled){
-            guard let center = self.originalImageCenter else {return}
-            UIView.animate(withDuration: 0.3, animations: {
-                self.viewPhoto_View.scrollView.transform = CGAffineTransform.identity
-                self.viewPhoto_View.scrollView.center = center
-            }, completion: { _ in
-                self.isZooming = false
-            })
-        }
-    }
-    
+
     //MARK: UDLR gestures
     @objc func swipeAction(_ gestureRecognizer : UISwipeGestureRecognizer){
         if !(isZooming){

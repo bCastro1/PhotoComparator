@@ -7,9 +7,11 @@
 //
 
 import Foundation
+import CloudKit
 
 struct CollectionFolderModel {
     var name: NSString
     var nameUID: NSString
     var picturedObjectRecordID: NSString
+    var cKRecord: CKRecord
 }

@@ -32,7 +32,9 @@ class Crop_MergeVC: UIViewController/*, UIScrollViewDelegate*/ {
     
     var imgviewrect: CGRect!
     var hasUserCroppedImage = false
-    var cropShape: String = "Square"
+    var cropShape: String = "None"
+    
+    var continueButton = UIBarButtonItem()
     
     //MARK: Initilization
     override func viewDidLoad() {
@@ -47,27 +49,38 @@ class Crop_MergeVC: UIViewController/*, UIScrollViewDelegate*/ {
     
     //MARK: Navigation Setup
     func setNavigationButtons(){
-        if (hasUserCroppedImage){
-            let continueButton = UIBarButtonItem(title: "Continue", style: .done, target: self, action: #selector(continueButtonAction))
-            let backButton = UIBarButtonItem(title: "Discard", style: .plain, target: self, action: #selector(discardCrop))
-            self.navigationItem.rightBarButtonItem = continueButton
-            self.navigationItem.leftBarButtonItem = backButton
-        }
-        else {
-            let cropButton = UIBarButtonItem(title: "Crop", style: .done, target: self, action: #selector(cropImage))
-            let backButton = UIBarButtonItem(title: ionicon.ChevronLeft.rawValue + "Back", style: .plain, target: self, action: #selector(backButtonAction))
-            let attributes = [NSAttributedString.Key.font: UIFont.ioniconFontOfSize(18)] as Dictionary
-            backButton.tintColor = self.view.tintColor
-            backButton.setTitleTextAttributes(attributes, for: .normal)
-            backButton.setTitleTextAttributes(attributes, for: .highlighted)
-            
-            self.navigationItem.rightBarButtonItem = cropButton
-            self.navigationItem.leftBarButtonItem = backButton
-        }
+//        if (hasUserCroppedImage){
+//            let continueButton = UIBarButtonItem(title: "Continue", style: .done, target: self, action: #selector(continueButtonAction))
+//            let backButton = UIBarButtonItem(title: "Discard", style: .plain, target: self, action: #selector(discardCrop))
+//            self.navigationItem.rightBarButtonItem = continueButton
+//            self.navigationItem.leftBarButtonItem = backButton
+//        }
+//        else {
+//            let cropButton = UIBarButtonItem(title: "Crop", style: .done, target: self, action: #selector(cropImage))
+//            let backButton = UIBarButtonItem(title: ionicon.ChevronLeft.rawValue + "Back", style: .plain, target: self, action: #selector(backButtonAction))
+//            let attributes = [NSAttributedString.Key.font: UIFont.ioniconFontOfSize(18)] as Dictionary
+//            backButton.tintColor = self.view.tintColor
+//            backButton.setTitleTextAttributes(attributes, for: .normal)
+//            backButton.setTitleTextAttributes(attributes, for: .highlighted)
+//
+//            self.navigationItem.rightBarButtonItem = cropButton
+//            self.navigationItem.leftBarButtonItem = backButton
+//        }
+
+        
+        
+        
+        self.continueButton = UIBarButtonItem(title: "Continue", style: .done, target: self, action: #selector(continueButtonAction))
+        self.navigationItem.rightBarButtonItem = self.continueButton
 
     }
     
     //MARK: Navigation actions
+    
+    
+    
+    
+    //MARK: Crop image
     @objc func cropImage(){
         hasUserCroppedImage = true
         retrieveCroppedImage()
@@ -75,6 +88,11 @@ class Crop_MergeVC: UIViewController/*, UIScrollViewDelegate*/ {
         self.imageView.image = cropped_ObjectToMerge[index].photo
         cropView.isHidden = true
         cropShapeIndicator.isHidden = true
+        
+        //setting button for next action
+        cropButton.setTitle("Reset Crop", for: .normal)
+        cropButton.setTitle("Reset Crop", for: .selected)
+        cropButton.addTarget(self, action: #selector(discardCrop), for: .touchUpInside)
     }
     
     @objc func discardCrop(){
@@ -84,6 +102,11 @@ class Crop_MergeVC: UIViewController/*, UIScrollViewDelegate*/ {
         self.cropped_ObjectToMerge[index].photo = photoArray_ObjectsToMerge[index].photo
         cropView.isHidden = false
         cropShapeIndicator.isHidden = false
+        
+        //setting button for opposite reaction
+        cropButton.setTitle("Crop!", for: .normal)
+        cropButton.setTitle("Crop!", for: .selected)
+        cropButton.addTarget(self, action: #selector(cropImage), for: .touchUpInside)
     }
     
     @objc func continueButtonAction(){
@@ -129,13 +152,31 @@ class Crop_MergeVC: UIViewController/*, UIScrollViewDelegate*/ {
     var cropShapeIndicator: UIButton = {
         let button = UIButton(type: .system)
         button.backgroundColor = UIColor.blue
-        button.titleLabel?.textColor = UIColor.white
+        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(.white, for: .selected)
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         button.titleLabel?.adjustsFontSizeToFitWidth = true
         button.isUserInteractionEnabled = true
         button.layer.masksToBounds = true
         button.layer.cornerRadius = 5
         button.layer.borderColor = UIColor.gray.cgColor
         button.layer.borderWidth = 2
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    var cropButton: UIButton = {
+        var button = UIButton(type: .system)
+        button.setTitleColor(.black, for: .normal)
+        button.setTitleColor(.black, for: .selected)
+        button.backgroundColor = .red
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
+        button.titleLabel?.adjustsFontSizeToFitWidth = true
+        button.isUserInteractionEnabled = true
+        button.layer.masksToBounds = true
+        button.layer.cornerRadius = 5
+        button.layer.borderColor = UIColor.black.cgColor
+        button.layer.borderWidth = 1
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -149,7 +190,8 @@ class Crop_MergeVC: UIViewController/*, UIScrollViewDelegate*/ {
         imgviewrect = imageView.bounds
         self.calculateRect()
         self.makeCropAreaVisible()
-        
+        self.cropView.isHidden = true //hidden at first since default shape is None.
+
         self.view.addSubview(cropShapeIndicator)
         cropShapeIndicator.widthAnchor.constraint(equalTo: self.view.widthAnchor, constant: -100).isActive = true
         cropShapeIndicator.heightAnchor.constraint(equalToConstant: 40).isActive = true
@@ -157,6 +199,16 @@ class Crop_MergeVC: UIViewController/*, UIScrollViewDelegate*/ {
         cropShapeIndicator.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 12).isActive = true
         self.cropShapeIndicator.addTarget(self, action: #selector(cropShapeIndicatorButtonPressed), for: .touchUpInside)
         self.cropShapeIndicator.setTitle("Crop Shape: \(cropShape)", for: .normal)
+        
+        self.view.addSubview(cropButton)
+        cropButton.widthAnchor.constraint(equalToConstant: 140).isActive = true
+        cropButton.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        cropButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+        cropButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -12).isActive = true
+        cropButton.setTitle("Crop!", for: .normal)
+        cropButton.setTitle("Crop!", for: .selected)
+        cropButton.addTarget(self, action: #selector(cropImage), for: .touchUpInside)
+        self.cropButton.isHidden = true //hidden at first since no crop shape will be selected when first loading.
     }
     
 
@@ -193,33 +245,55 @@ class Crop_MergeVC: UIViewController/*, UIScrollViewDelegate*/ {
         let imageRef =  imagePicked.cgImage!.cropping(to: cliprect )
         let croppedImg  = UIImage(cgImage: imageRef!, scale:  UIScreen.main.scale, orientation: imagePicked.imageOrientation)
         self.cropped_ObjectToMerge[index].photo = croppedImg
-        //print("Operation complete");
     }
     
     //MARK: Crop shapes
     @objc func cropShapeIndicatorButtonPressed(){
         let cropShapeNotice = UIAlertController(title: "Crop Shape", message: "", preferredStyle: .actionSheet)
+        let none = UIAlertAction(title: "None", style: .default) { handler in
+            self.cropView.isHidden = true
+            self.continueButton.isEnabled = true
+            self.cropButton.isHidden = true
+            self.cropShape = "None"
+            self.cropShapeIndicator.setTitle("Crop Shape: \(self.cropShape)", for: .normal)
+            self.cropShapeIndicator.setTitle("Crop Shape: \(self.cropShape)", for: .selected)
+        }
         let square = UIAlertAction(title: "Square", style: .default) { handler in
+            self.cropView.isHidden = false
+            self.continueButton.isEnabled = true
+            self.cropButton.isHidden = false
             self.cropType = CROP_TYPE.square
             self.cropShape = "Square"
             self.makeCropAreaVisible()
         }
         let _3x2 = UIAlertAction(title: "Rectangle 3x2", style: .default) { handler in
+            self.cropView.isHidden = false
+            self.continueButton.isEnabled = true
+            self.cropButton.isHidden = false
             self.cropType = CROP_TYPE.rect3x2
             self.cropShape = "Rectangle 3x2"
             self.makeCropAreaVisible()
         }
         let _2x3 = UIAlertAction(title: "Rectangle 2x3", style: .default) { handler in
+            self.cropView.isHidden = false
+            self.continueButton.isEnabled = true
+            self.cropButton.isHidden = false
             self.cropType = CROP_TYPE.rect2x3
             self.cropShape = "Rectangle 2x3"
             self.makeCropAreaVisible()
         }
         let _4x3 = UIAlertAction(title: "Rectangle 4x3", style: .default) { handler in
+            self.cropView.isHidden = false
+            self.continueButton.isEnabled = true
+            self.cropButton.isHidden = false
             self.cropType = CROP_TYPE.rect4x3
             self.cropShape = "Rectangle 4x3"
             self.makeCropAreaVisible()
         }
         let _3x4 = UIAlertAction(title: "Rectangle 3x4", style: .default) { handler in
+            self.cropView.isHidden = false
+            self.continueButton.isEnabled = true
+            self.cropButton.isHidden = false
             self.cropType = CROP_TYPE.rect3x4
             self.cropShape = "Rectangle 3x4"
             self.makeCropAreaVisible()
@@ -227,6 +301,7 @@ class Crop_MergeVC: UIViewController/*, UIScrollViewDelegate*/ {
 
         
         let cancel = UIAlertAction(title: "Cancel", style: .default, handler: nil)
+        cropShapeNotice.addAction(none)
         cropShapeNotice.addAction(square)
         cropShapeNotice.addAction(_3x2)
         cropShapeNotice.addAction(_2x3)
@@ -238,5 +313,7 @@ class Crop_MergeVC: UIViewController/*, UIScrollViewDelegate*/ {
 
         self.present(cropShapeNotice, animated: true, completion: nil)
     }
+    
+    
 }
 

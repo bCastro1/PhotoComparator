@@ -16,12 +16,14 @@ class PhotoCollectionVC: CollectionViewController {
     //MARK: Variable Declaration
     var coreDataContext: NSManagedObjectContext! = nil
     var collectionNameUID: String = ""
+    var updatedCollectionName: String?
+    var collectionFolder_CKRecord: CKRecord?
     
     var photoModel: PhotoCollectionObject!
     var photoArray: Array<PhotoCollectionObject> = []
     var photoArray_ObjectsToCompare: Array<PhotoCollectionObject> = []
     var photoArray_ObjectsToMerge: Array<PhotoCollectionObject> = []
-
+    
 
     var photoKeyToQuery: String = ""
     var viewPhoto = ViewPhoto_View()
@@ -49,7 +51,12 @@ class PhotoCollectionVC: CollectionViewController {
 
         self.photoKeyToQuery = photoModel.id
         
-        
+        self.navigationItem.leftBarButtonItem = setBackButton()
+        self.navigationItem.rightBarButtonItem = collectionOptionsButton()
+        setupCompareButton()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
         if (getUserDefaultStorageType() == "Cloud"){
             fetchRecordFromCloud()
         }
@@ -57,14 +64,6 @@ class PhotoCollectionVC: CollectionViewController {
             fetchCollectionFromCoreData()
         }
         
-        
-        
-        self.navigationItem.leftBarButtonItem = setBackButton()
-        self.navigationItem.rightBarButtonItem = collectionOptionsButton()
-        setupCompareButton()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
         //sets all views back to normal
         self.cancelCompareMode()
     }
@@ -72,8 +71,12 @@ class PhotoCollectionVC: CollectionViewController {
     //MARK: Cell Setup
     
     func setupCells(mode: vcMode){
+        var header = HeaderViewModel(.init(title: "\(photoModel.name)"))
+
+        if (self.updatedCollectionName != nil){
+            header = HeaderViewModel(.init(title: "\(self.updatedCollectionName!)"))
+        }
         
-        let header = HeaderViewModel(.init(title: "\(photoModel.name)"))
         let items = photoArray.map { [weak self] photoArray in
             PhotoCollectionViewModel(photoArray)
                 .onSelect{ [weak self]  viewModel in
@@ -293,6 +296,9 @@ class PhotoCollectionVC: CollectionViewController {
         let importNewPhotosOption = UIAlertAction(title: "Import More Photos", style: .default) { handler in
             self.importNewPhotos()
         }
+        let changeCollectionNameOption = UIAlertAction(title: "Change Collection Name", style: .default) { handler in
+            self.changeCollectionFolderNameAction()
+        }
         let cropAndMergePhotosOption = UIAlertAction(title: "View Subset of Photos", style: .default) { handler in
             self.comparePhotos()
         }
@@ -305,6 +311,7 @@ class PhotoCollectionVC: CollectionViewController {
         let cancelOption = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         
         moreOptionsAlert.addAction(importNewPhotosOption)
+        moreOptionsAlert.addAction(changeCollectionNameOption)
         moreOptionsAlert.addAction(cropAndMergePhotosOption)
         moreOptionsAlert.addAction(deleteSinglePhotoOption)
         moreOptionsAlert.addAction(deleteCollectionOption)
@@ -324,6 +331,62 @@ class PhotoCollectionVC: CollectionViewController {
         photoImportVC.title = "\(self.photoModel.name)"
         self.navigationController?.pushViewController(photoImportVC, animated: true)
     }
+    
+    //MARK: Update collection name
+    func changeCollectionFolderNameAction(){
+        let changeNameNotice = UIAlertController(title: "Change Collection Name", message: "Fill in the text field with the updated collection name.", preferredStyle: .alert)
+        
+        let getInput = UIAlertAction(title: "Update", style: .default, handler: {
+            alert -> Void in
+            let textField = changeNameNotice.textFields![0] as UITextField
+            textField.autocapitalizationType = .words
+            textField.spellCheckingType = .default
+            textField.placeholder = self.photoModel.name
+            self.updatedCollectionName = textField.text!
+            self.checkCollectionName()
+        })
+        changeNameNotice.addTextField { (textField : UITextField!) -> Void in
+            textField.placeholder = self.photoModel.name }
+        changeNameNotice.addAction(getInput)
+        changeNameNotice.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        self.present(changeNameNotice, animated: true, completion: nil)
+        
+    }
+    
+    enum pageCompletionError: Error {
+        case invalidNameLength
+    }
+    
+    func checkCollectionName(){
+        do {
+            try self.updateCollectionName()
+        }
+        catch pageCompletionError.invalidNameLength {
+             showSimpleAlertWithTitle("Error", message: "The colleciton name must be between 6 and 24 characters.", viewController: self)
+        }
+        catch {
+            showSimpleAlertWithTitle("Error", message: "Collection name could not be updated at this time. Please try again later.", viewController: self)
+        }
+    }
+    
+    func updateCollectionName() throws {
+        guard self.updatedCollectionName!.count <= 36 && self.updatedCollectionName!.count >= 6 else {
+            throw pageCompletionError.invalidNameLength
+        }
+        
+        if(getUserDefaultStorageType() == "Cloud"){
+            //ck name update
+            self.setupCells(mode: .observe)
+            if let record = self.collectionFolder_CKRecord {
+                self.cloudkitOperations.updateFolderName(newFolderName: self.updatedCollectionName!, folderToUpdate: record)
+            }
+        }
+        else {
+            self.setupCells(mode: .observe)
+            self.coreDataFunctions.updateCollectionName(collectionName: self.updatedCollectionName!, nameUID: self.collectionNameUID)
+        }
+    }
+    
     
     //MARK: Delete collection action
     
@@ -377,14 +440,16 @@ class PhotoCollectionVC: CollectionViewController {
     //https://appsbydeb.wordpress.com/2016/01/07/ios-swift-simple-image-cropping-app/
     
     @objc func cropAndMergePhotos(){
-        let step1DirectionsNotice = UIAlertController(title: "Compare and Merge Two Photos", message: "Begin by selecting two photos you would like to compare, side-by-side. This will not change the original chosen photos. After you have finished making your selection, press the Next button.", preferredStyle: .alert)
-        let okButton = UIAlertAction(title: "Continue", style: .default) { handler in
-            self.setupCropAndMergeLayout()
-        }
-        let cancelButton = UIAlertAction(title: "Cancel", style: .default, handler: nil)
-        step1DirectionsNotice.addAction(okButton)
-        step1DirectionsNotice.addAction(cancelButton)
-        self.present(step1DirectionsNotice, animated: true, completion: nil)
+//        let step1DirectionsNotice = UIAlertController(title: "Compare and Merge Two Photos", message: "Begin by selecting two photos you would like to compare, side-by-side. This will not change the original chosen photos. After you have finished making your selection, press the Next button.", preferredStyle: .alert)
+//        let okButton = UIAlertAction(title: "Continue", style: .default) { handler in
+//            self.setupCropAndMergeLayout()
+//        }
+//        let cancelButton = UIAlertAction(title: "Cancel", style: .default, handler: nil)
+//        step1DirectionsNotice.addAction(okButton)
+//        step1DirectionsNotice.addAction(cancelButton)
+//        self.present(step1DirectionsNotice, animated: true, completion: nil)
+        
+        self.setupCropAndMergeLayout()
     }
     
     func setupCropAndMergeLayout(){

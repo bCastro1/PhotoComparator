@@ -191,6 +191,31 @@ class CoreDataFunctions {
         }
     }
     
+    
+    //MARK: Upldate colleciton name
+    func updateCollectionName(collectionName: String, nameUID: String){
+        save_Queue.sync {
+            var recordFromCoreData: [NSManagedObject] = []
+            do {
+                let fetchRequest: NSFetchRequest<CollectionNameInfo> = CollectionNameInfo.fetchRequest()
+                fetchRequest.predicate = NSPredicate(format: "nameUID == %@", nameUID)
+                recordFromCoreData = try context.fetch(fetchRequest)
+
+                if let record = recordFromCoreData.first {
+                    record.setValue(collectionName, forKey: "name")
+                    do {
+                        try context.save()
+                        print("collectionNameInfo updated!")
+                    } catch {
+                        fatalError("Failure to save context: \(error)")
+                    }
+                }
+            } catch let error as NSError {
+                print("Error fetching CoreData: \(error.localizedDescription)")
+            }
+        }
+    }
+    
     func getTimestampIdentifierWithIndex(idx: Int) -> String{
         //creating unique pictureID
         let timestampAsString = String(format: "%f", Date.timeIntervalSinceReferenceDate)

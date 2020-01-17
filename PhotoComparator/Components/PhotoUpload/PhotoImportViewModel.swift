@@ -12,6 +12,11 @@ class PhotoImportViewModel: ViewModel<PhotoImportCell, PicturedObject>{
     
     override func updateView() {
         self.view?.dateLabel.text = self.model.date.formatDate()
+        if #available(iOS 13.0, *) {
+            self.view?.dateLabel.textColor = .dynamicTextColor
+        } else {
+            self.view?.dateLabel.textColor = .black
+        }
         self.view?.imageView.image = self.model.photo
     }
     

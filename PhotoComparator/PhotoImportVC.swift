@@ -11,8 +11,9 @@ import BSImagePicker
 import Photos
 import CloudKit
 import CoreData
+import AVFoundation
 
-class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol {
+class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     var isFinished: Bool = false
     var progressTotal: Int = 0
 
@@ -102,6 +103,7 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol {
         }
         
         coreDataFunctions.delegate = self
+        cloudkitOperations.delegate = self
         self.collectionView.register(PhotoImportCell.self, forCellWithReuseIdentifier: "PhotoImportCell")
         self.setupProgressView()
     }
@@ -137,14 +139,100 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol {
     }
     
     @objc func newPhotoImportAction(){
-        self.getNewCollectionNameFromUser()
+        if (newCollectionName == ""){
+            self.getNewCollectionNameFromUser()
+        }
+        else {
+            self.promptSavedPhotosOrCamera()
+        }
     }
     
     @objc func existingPhotoImportAction(){
-        self.selectPhotosFromLibrary()
-        self.importButtonDisplayPicker.isHidden = true
+        self.promptSavedPhotosOrCamera()
     }
     
+    
+    //MARK: Choose photo location prompt
+    //camera or camera roll
+    func promptSavedPhotosOrCamera(){
+        
+        let prompt = UIAlertController(title: "Photo Location", message: "Choose from photo roll or bring up camera now", preferredStyle: .actionSheet)
+        let cameraAction = UIAlertAction(title: "Camera", style: .default) { handler in
+            self.checkCameraStatus()
+        }
+        let photoRoll = UIAlertAction(title: "Saved Photos", style: .default) { handler in
+            self.selectPhotosFromLibrary()
+        }
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel) { handler in
+        }
+        prompt.addAction(cameraAction)
+        prompt.addAction(photoRoll)
+        prompt.addAction(cancel)
+        self.present(prompt, animated: true, completion: nil)
+    }
+    
+    //MARK: Camera permission and usage
+    func checkCameraStatus(){
+        let cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
+        switch cameraAuthorizationStatus {
+            case .notDetermined:
+                requestCameraPermission()
+                break
+            case .authorized:
+                presentCamera()
+                break
+            case .restricted, .denied:
+                cameraAccessNeeded()
+                break
+            default:
+                break
+        }
+    }
+    
+    func requestCameraPermission(){
+        AVCaptureDevice.requestAccess(for: .video, completionHandler: {accessGranted in
+            guard accessGranted == true else { return }
+                self.presentCamera()
+        })
+    }
+    
+    func presentCamera(){
+        #if targetEnvironment(simulator)
+            showSimpleAlertWithTitle("Error", message: "Cannot open the camera using a simulator", viewController: self)
+            self.importButtonDisplayPicker.isHidden = false
+        #else
+            let photoPicker = UIImagePickerController()
+            photoPicker.sourceType = .camera
+            photoPicker.delegate = self
+            self.present(photoPicker, animated: true, completion: nil)
+        #endif
+        
+    }
+    
+    func cameraAccessNeeded(){
+        let settingsAppURL = URL(string: UIApplication.openSettingsURLString)!
+            let alert = UIAlertController(title: "Need Camera Access", message: "Camera access is required to make full use of this app.",preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: nil))
+        
+        alert.addAction(UIAlertAction(title: "Allow Camera", style: .cancel, handler: { (alert) -> Void in
+            UIApplication.shared.open(settingsAppURL, options: [:], completionHandler: nil)
+        }))
+        present(alert, animated: true, completion: nil)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]){
+         guard let selectedImage = info[.originalImage] as? UIImage else {
+             fatalError("Expected a dictionary containing an image, but was provided the following: \(info)")
+         }
+        let picturedObject = PicturedObject(
+            date: NSDate(),
+            photo: selectedImage,
+            id: self.UID)
+        self.photoObjectArray.append(picturedObject)
+        self.photoObjectArray.sort(by: { $0.date.compare($1.date as Date) == ComparisonResult.orderedAscending })
+        self.setupCells()
+        dismiss(animated: true, completion: nil)
+     }
     
     //MARK: Getting collection name
     @objc func getNewCollectionNameFromUser(){
@@ -158,7 +246,7 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol {
             self.newCollectionName = textField.text ?? ""
             self.title = self.newCollectionName
             if (self.photoObjectArray.isEmpty){
-                self.selectPhotosFromLibrary()
+                self.promptSavedPhotosOrCamera()
             }
         })
         prompt.addTextField { (textField : UITextField!) -> Void in
@@ -252,7 +340,7 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol {
         }
         catch pageCompletionError.invalidPicture {
             print("err: pic")
-            showSimpleAlertWithTitle("Group Picture Error", message: "A group photo is required.", viewController: self)
+            showSimpleAlertWithTitle("Picture Error", message: "You must upload at least one photo.", viewController: self)
         }
         catch {
             showSimpleAlertWithTitle("Error", message: "An internal error occurred. Please try again later.", viewController: self)
@@ -274,16 +362,20 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol {
         //start upload
 
         if (getUserDefaultStorageType() == "Cloud"){
+            progressView.isHidden = false
+            progressTotal = photoObjectArray.count
+            
             cloudkitOperations.uploadPhotoObjectArray(photoArray: photoObjectArray)
             cloudkitOperations.setFolderInfo(folderName: self.newCollectionName as NSString, nameUID: self.UID, recordID: cloudkitOperations.getTimestampID() as NSString)
         }
         else{
             progressView.isHidden = false
             progressTotal = photoObjectArray.count
+            
             coreDataFunctions.savePicturedObjectCollection(photoObjectArray: photoObjectArray, nameUID: self.UID as String)
             coreDataFunctions.saveNewCollectionInfo(collectionName: self.newCollectionName, nameUID: self.UID as String)
-            
         }
+        
         
     }
     
@@ -296,7 +388,7 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol {
         }
         catch pageCompletionError.invalidPicture {
             print("err: pic")
-            showSimpleAlertWithTitle("Group Picture Error", message: "Nothing to upload!", viewController: self)
+            showSimpleAlertWithTitle("Picture Error", message: "You must upload at least one photo.", viewController: self)
         }
         catch {
             showSimpleAlertWithTitle("Error", message: "An internal error occurred. Please try again later.", viewController: self)
@@ -326,6 +418,7 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol {
     
     //MARK: Single photo upload
     @objc func singlePhotoUploadButtonPressed(){
+        //used when saving a cropped/comparison photo
         do {
             try pageCompletionCheck_SinglePhotoUpload()
             print("merged photo upload success!")

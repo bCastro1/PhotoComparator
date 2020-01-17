@@ -17,8 +17,8 @@ class Crop_Merge_FinishVC: UIViewController, MFMessageComposeViewControllerDeleg
     var firstImage = UIImage()
     var secondImage = UIImage()
     var dateString = ""
-    var photoDisplayModeActivated = false
-    var viewModeString_Opposite: String = "Portrait Mode"
+    var photoDisplayModeActivated = true
+    var viewModeString_Opposite: String = "Landscape Mode"
     var viewModeBool_isPortraitModeActive: Bool = false
     
     var earlierDate: NSDate! //dates for each photo
@@ -36,8 +36,9 @@ class Crop_Merge_FinishVC: UIViewController, MFMessageComposeViewControllerDeleg
         setupViews()
         setDateLabel()
 
-        constructTimelapsePicture(.landscape)
+        constructTimelapsePicture(.portrait)
         navigationBarSetup()
+        self.navigationController?.navigationBar.isHidden = photoDisplayModeActivated
     }
     
     //MARK: Navigaiton bar setup
@@ -59,7 +60,7 @@ class Crop_Merge_FinishVC: UIViewController, MFMessageComposeViewControllerDeleg
     }
     
     @objc func exitCroppedView(){
-        let exitNotice = UIAlertController(title: "Are you sure?", message: "By tapping continue, this comparison photo will be lost unless you have already saved it.", preferredStyle: .alert)
+        let exitNotice = UIAlertController(title: "Are you sure?", message: "By selecting continue, this comparison photo will be lost unless you have already saved it.", preferredStyle: .alert)
         let continueAction = UIAlertAction(title: "Discard", style: .destructive) { handler in
             self.navigationController?.popViewControllers(controllersToPop: 3, animated: true)
         }
@@ -116,7 +117,7 @@ class Crop_Merge_FinishVC: UIViewController, MFMessageComposeViewControllerDeleg
         dateLabel.text = dateString
         dateLabel.alpha = 0.65
         
-        setDateLabelPosition(.top)
+        setDateLabelPosition(.middle)
         dateLabel.isUserInteractionEnabled = true
         dateLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(switchDateLabelPosition)))
     }

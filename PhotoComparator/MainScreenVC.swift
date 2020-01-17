@@ -20,6 +20,7 @@ class MainScreenVC: CollectionViewController, DropDownProtocol {
     var coreDataContext: NSManagedObjectContext! = nil
     
     var photoArray: Array<MainScreenModel> = []
+    var collectionFolders: Array<CollectionFolderModel> = []
     var coreDataFunctions = CoreDataFunctions()
     var cloudkitOperations = CloudKitFunctions()
     
@@ -60,6 +61,7 @@ class MainScreenVC: CollectionViewController, DropDownProtocol {
     
     override func viewWillAppear(_ animated: Bool){
         super.viewWillAppear(animated)
+        photoArray.removeAll()
         getStorageTypeFromMemory() //dataSource from cloud or local mem
     }
     
@@ -80,16 +82,14 @@ class MainScreenVC: CollectionViewController, DropDownProtocol {
         switch type {
         case .cloud:
             setupRefreshButton()
-            self.photoArray.removeAll()
             getCKCollectionFolderInfo()
             break
         case .local:
             setupRefreshButton()
-            self.photoArray.removeAll()
             getImagesFromCoreData()
             OperationQueue.main.addOperation({ () -> Void in
-             self.setFetchedDataToCells()
-             self.collectionView.reloadData()
+                self.setFetchedDataToCells()
+                self.collectionView.reloadData()
             })
             
             break
@@ -108,9 +108,10 @@ class MainScreenVC: CollectionViewController, DropDownProtocol {
     
     func getCKCollectionFolderInfo(){
         cloudkitOperations.getMainPageFolders { (collectionFoldersInfo) in
-            guard let folderArray = collectionFoldersInfo else {return}
+            guard let folderArray = collectionFoldersInfo else { return }
+            self.collectionFolders = folderArray
             self.cloudkitOperations.getCollectionFolderRecords(folderArray){ (collectionFolderRecords) -> Void in
-                guard let folders = collectionFolderRecords else {return}
+                guard let folders = collectionFolderRecords else { return }
                 self.photoArray = folders
                 OperationQueue.main.addOperation({ () -> Void in
                     self.setFetchedDataToCells()
@@ -132,7 +133,7 @@ class MainScreenVC: CollectionViewController, DropDownProtocol {
     //MARK: Cell Setup
     
     func setFetchedDataToCells(){
-        
+        //didSelectRow
         let grid = Grid(columns: 2, margin: UIEdgeInsets(horizontal: 0, vertical: 25), padding: .zero)
         let items = photoArray.map { [weak self] photoArray in
             MainScreenViewModel(photoArray)
@@ -144,10 +145,16 @@ class MainScreenVC: CollectionViewController, DropDownProtocol {
                     let name = viewModel.model.name
                     //MARK: Present Collection VC
                     collectionViewController.photoModel = PhotoCollectionObject(date: date, photo: photo, id: id, name: name, ckrecordID: CKRecord.ID(recordName: "foo"), hideBlurView: true)
+                    
                     collectionViewController.coreDataContext = self?.coreDataContext
                     collectionViewController.coreDataFunctions = self!.coreDataFunctions
                     collectionViewController.cloudkitOperations = self!.cloudkitOperations
+                    
                     collectionViewController.collectionNameUID = viewModel.model.nameUID
+                    let nameUID = viewModel.model.nameUID
+                    if let folderIdx = self?.collectionFolders.firstIndex(where: {$0.nameUID as String == nameUID}) {
+                        collectionViewController.collectionFolder_CKRecord = self?.collectionFolders[folderIdx].cKRecord
+                    }
                     self?.show(collectionViewController, sender: nil)
             }
         }
@@ -217,8 +224,10 @@ class MainScreenVC: CollectionViewController, DropDownProtocol {
         }, completion: nil)
     }
 
-    //PROTOCOL
+    //MARK: PROTOCOL
     func dropDownPressed(string: String) {
+        self.photoArray.removeAll()
+        self.setFetchedDataToCells()
         storageOptionView.viewText.text = string
         if (string == "CloudKit Storage"){
             setUserDefaultStorageType("Cloud")
@@ -270,16 +279,13 @@ class MainScreenVC: CollectionViewController, DropDownProtocol {
         }
         else {
             photoArray.removeAll()
-
             getImagesFromCoreData()
-            
-            OperationQueue.main.addOperation({ () -> Void in
+        }
+        
+        OperationQueue.main.addOperation({ () -> Void in
              self.setFetchedDataToCells()
              self.collectionView.reloadData()
-            })
-        }
-        //coreDataFunctions.setAssets(coreDataContext)
-
+        })
     }
     
     

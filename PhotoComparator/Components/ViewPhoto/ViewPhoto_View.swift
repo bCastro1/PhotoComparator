@@ -16,6 +16,7 @@ class ViewPhoto_View: UIView {
         super.init(frame: frame)
         self.backgroundColor = UIColor.black
         setupView()
+        
     }
     
     required init?(coder aDecoder: NSCoder) {
