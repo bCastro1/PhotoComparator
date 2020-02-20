@@ -1,8 +1,12 @@
-FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/BSGridCollectionViewLayout" "${PODS_CONFIGURATION_BUILD_DIR}/BSImagePicker" "${PODS_CONFIGURATION_BUILD_DIR}/BSImageView" "${PODS_CONFIGURATION_BUILD_DIR}/CollectionView" "${PODS_CONFIGURATION_BUILD_DIR}/ImageScrollView"
-GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
-HEADER_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/BSGridCollectionViewLayout/BSGridCollectionViewLayout.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/BSImagePicker/BSImagePicker.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/BSImageView/BSImageView.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/CollectionView/CollectionView.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/ImageScrollView/ImageScrollView.framework/Headers"
-OTHER_LDFLAGS = $(inherited) -framework "BSGridCollectionViewLayout" -framework "BSImagePicker" -framework "BSImageView" -framework "CollectionView" -framework "ImageScrollView" -framework "Photos" -framework "UIKit"
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/Google-Mobile-Ads-SDK/Frameworks/GoogleMobileAdsFramework-Current" "${PODS_ROOT}/GoogleAppMeasurement/Frameworks"
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1 $(inherited) PB_FIELD_32BIT=1 PB_NO_PACKED_STRUCTS=1 PB_ENABLE_MALLOC=1
+HEADER_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/Headers/Public" "${PODS_ROOT}/Headers/Public/GoogleUtilities" "${PODS_ROOT}/Headers/Public/nanopb"
+OTHER_CFLAGS = $(inherited) -fmodule-map-file="${PODS_CONFIGURATION_BUILD_DIR}/BSImagePicker/BSImagePicker.modulemap" -fmodule-map-file="${PODS_CONFIGURATION_BUILD_DIR}/CollectionView/CollectionView.modulemap" -fmodule-map-file="${PODS_CONFIGURATION_BUILD_DIR}/ImageScrollView/ImageScrollView.modulemap"
+OTHER_LDFLAGS = $(inherited) -l"c++" -l"sqlite3" -l"z" -framework "AVFoundation" -framework "AudioToolbox" -framework "CFNetwork" -framework "CoreGraphics" -framework "CoreMedia" -framework "CoreTelephony" -framework "CoreVideo" -framework "MediaPlayer" -framework "MessageUI" -framework "MobileCoreServices" -framework "Photos" -framework "QuartzCore" -framework "Security" -framework "StoreKit" -framework "SystemConfiguration" -framework "UIKit"
+OTHER_SWIFT_FLAGS = $(inherited) -D COCOAPODS -Xcc -fmodule-map-file="${PODS_CONFIGURATION_BUILD_DIR}/BSImagePicker/BSImagePicker.modulemap" -Xcc -fmodule-map-file="${PODS_CONFIGURATION_BUILD_DIR}/CollectionView/CollectionView.modulemap" -Xcc -fmodule-map-file="${PODS_CONFIGURATION_BUILD_DIR}/ImageScrollView/ImageScrollView.modulemap"
 PODS_BUILD_DIR = ${BUILD_DIR}
 PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
 PODS_PODFILE_DIR_PATH = ${SRCROOT}/.
 PODS_ROOT = ${SRCROOT}/Pods
+SWIFT_INCLUDE_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/BSImagePicker" "${PODS_CONFIGURATION_BUILD_DIR}/CollectionView" "${PODS_CONFIGURATION_BUILD_DIR}/ImageScrollView"
+USE_RECURSIVE_SCRIPT_INPUTS_IN_SCRIPT_PHASES = YES

@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "377E69F20375EB612410D6BD87B4AF98"
-               BuildableName = "BSImagePicker.framework"
+               BuildableName = "libBSImagePicker.a"
                BlueprintName = "BSImagePicker"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>

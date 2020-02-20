@@ -14,7 +14,6 @@ import CloudKit
 class PhotoCollectionVC: CollectionViewController {
     
     //MARK: Variable Declaration
-    var coreDataContext: NSManagedObjectContext! = nil
     var collectionNameUID: String = ""
     var updatedCollectionName: String?
     var collectionFolder_CKRecord: CKRecord?
@@ -27,9 +26,6 @@ class PhotoCollectionVC: CollectionViewController {
 
     var photoKeyToQuery: String = ""
     var viewPhoto = ViewPhoto_View()
-    var compareButton = CompareButton()
-    var coreDataFunctions = CoreDataFunctions()
-    var cloudkitOperations = CloudKitFunctions()
 
     enum vcMode {
         case observe
@@ -38,22 +34,31 @@ class PhotoCollectionVC: CollectionViewController {
         case merge
     }
     
+    //MARK: Init
+    var coreDataFunctions: CoreDataFunctions?
+    var cloudkitOperations: CloudKitFunctions?
+    
+    init(coreDataFunctions: CoreDataFunctions, cloudKitOperations: CloudKitFunctions){
+        super.init()
+        self.coreDataFunctions = coreDataFunctions
+        self.cloudkitOperations = cloudKitOperations
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     //MARK: ViewDidLoad
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if #available(iOS 13.0, *) {
-            self.collectionView.backgroundColor = UIColor.dynamicBackgroundColor
-        } else {
-            self.collectionView.backgroundColor = UIColor.white
-        }
+        self.collectionView.backgroundColor = .dynamicBackground()
 
         self.photoKeyToQuery = photoModel.id
         
         self.navigationItem.leftBarButtonItem = setBackButton()
         self.navigationItem.rightBarButtonItem = collectionOptionsButton()
-        setupCompareButton()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -64,8 +69,6 @@ class PhotoCollectionVC: CollectionViewController {
             fetchCollectionFromCoreData()
         }
         
-        //sets all views back to normal
-        self.cancelCompareMode()
     }
     
     //MARK: Cell Setup
@@ -108,7 +111,7 @@ class PhotoCollectionVC: CollectionViewController {
                             if (self!.getUserDefaultStorageType() == "Cloud"){
                                 print("delete: \(viewModel.model.ckrecordID.recordName)")
                                 if !(self?.photoModel.ckrecordID == viewModel.model.ckrecordID){
-                                    self?.cloudkitOperations.deleteRecord(photo: viewModel.model)
+                                    self?.cloudkitOperations!.deleteRecord(photo: viewModel.model)
                                     self?.collectionView.reloadData()
                                     self?.cancelPhotoDeletion()
                                     }
@@ -119,7 +122,7 @@ class PhotoCollectionVC: CollectionViewController {
                             else {
                                 //core data deletion
                                 if !(self?.photoModel.id == viewModel.model.id){
-                                    self?.coreDataFunctions.deleteRecordWithID(id: viewModel.model.id)
+                                    self?.coreDataFunctions?.deleteRecordWithID(id: viewModel.model.id)
                                     self?.collectionView.reloadData()
                                     self?.cancelPhotoDeletion()
                                 }
@@ -200,68 +203,14 @@ class PhotoCollectionVC: CollectionViewController {
     
     func fetchCollectionFromCoreData(){
         
-        coreDataFunctions.loadCollectionWithNameUID(nameUID: collectionNameUID, collectionName: photoModel.name)
-        self.photoArray = coreDataFunctions.collectionPhotoArray
+        coreDataFunctions?.loadCollectionWithNameUID(nameUID: collectionNameUID, collectionName: photoModel.name)
+        guard let unwrappedPhotoArray = self.coreDataFunctions?.collectionPhotoArray else {return}
+        self.photoArray = unwrappedPhotoArray
+        
         OperationQueue.main.addOperation({ () -> Void in
             self.setupCells(mode: .observe)
             self.collectionView.reloadData()
             })
-    }
-    
-    //MARK: Compare Setup
-    func setupCompareButton(){
-        self.view.addSubview(compareButton)
-        self.compareButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor).isActive = true
-        self.compareButton.heightAnchor.constraint(equalToConstant: 45).isActive = true
-        self.compareButton.widthAnchor.constraint(equalTo: self.view.widthAnchor, constant: -100).isActive = true
-        self.compareButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-        
-        self.compareButton.addTarget(self, action: #selector(cropAndMergePhotos), for: .touchUpInside)
-        self.view.bringSubviewToFront(compareButton)
-    }
-
-    
-    func comparePhotos(){
-        photoArray_ObjectsToCompare.removeAll()
-        self.compareButton.isHidden = true
-
-        for index in 0..<photoArray.count {
-            photoArray[index].hideBlurView = false
-        }
-        
-        let cancelButton = UIBarButtonItem(title: "Cancel", style: .done, target: self, action: #selector(cancelCompareMode))
-        self.navigationItem.leftBarButtonItem = cancelButton
-        
-        let compareButton = UIBarButtonItem(title: "Compare", style: .plain, target: self, action: #selector(compareSelectedPhotos))
-        self.navigationItem.rightBarButtonItem = compareButton
-        
-        self.setupCells(mode: .compare)
-    }
-    
-    @objc func compareSelectedPhotos(){
-        if (photoArray_ObjectsToCompare.count > 1){
-            let photoView = ViewPhotoModeVC(nibName: nil, bundle: nil)
-            photoView.photoArray = self.photoArray_ObjectsToCompare
-            photoView.index = 0
-            photoView.modalPresentationStyle = .overFullScreen
-            self.present(photoView, animated: false, completion: nil)
-        }
-        else {
-            showSimpleAlertWithTitle("Error", message: "You must select 2 or more pictures in order to compare!", viewController: self)
-        }
-    }
-    
-    
-    @objc func cancelCompareMode(){
-        self.compareButton.isHidden = false
-        
-        for index in 0..<photoArray.count {
-            photoArray[index].hideBlurView = true
-        }
-        
-        self.navigationItem.rightBarButtonItem = collectionOptionsButton()
-        self.navigationItem.leftBarButtonItem = setBackButton()
-        self.setupCells(mode: .observe)
     }
     
     
@@ -299,9 +248,6 @@ class PhotoCollectionVC: CollectionViewController {
         let changeCollectionNameOption = UIAlertAction(title: "Change Collection Name", style: .default) { handler in
             self.changeCollectionFolderNameAction()
         }
-        let cropAndMergePhotosOption = UIAlertAction(title: "View Subset of Photos", style: .default) { handler in
-            self.comparePhotos()
-        }
         let deleteSinglePhotoOption = UIAlertAction(title: "Delete a Photo", style: .destructive) { handler in
             self.deleteSinglePhotoAction()
         }
@@ -312,7 +258,6 @@ class PhotoCollectionVC: CollectionViewController {
         
         moreOptionsAlert.addAction(importNewPhotosOption)
         moreOptionsAlert.addAction(changeCollectionNameOption)
-        moreOptionsAlert.addAction(cropAndMergePhotosOption)
         moreOptionsAlert.addAction(deleteSinglePhotoOption)
         moreOptionsAlert.addAction(deleteCollectionOption)
         moreOptionsAlert.addAction(cancelOption)
@@ -322,12 +267,9 @@ class PhotoCollectionVC: CollectionViewController {
     
     //MARK: Import new photo
     func importNewPhotos(){
-        let photoImportVC = PhotoImportVC()
-        photoImportVC.coreDataContext = self.coreDataContext
-        photoImportVC.coreDataFunctions = self.coreDataFunctions
-        photoImportVC.cloudkitOperations = self.cloudkitOperations
-        photoImportVC.UID = self.collectionNameUID as NSString
+        let photoImportVC = PhotoImportVC(coreDataFunctions: coreDataFunctions!, cloudKitOperations: self.cloudkitOperations!)
         photoImportVC.photoUploadOperations(operation: .existingCollection)
+        photoImportVC.newCollectionName = self.photoModel.name
         photoImportVC.title = "\(self.photoModel.name)"
         self.navigationController?.pushViewController(photoImportVC, animated: true)
     }
@@ -378,12 +320,12 @@ class PhotoCollectionVC: CollectionViewController {
             //ck name update
             self.setupCells(mode: .observe)
             if let record = self.collectionFolder_CKRecord {
-                self.cloudkitOperations.updateFolderName(newFolderName: self.updatedCollectionName!, folderToUpdate: record)
+                self.cloudkitOperations!.updateFolderName(newFolderName: self.updatedCollectionName!, folderToUpdate: record)
             }
         }
         else {
             self.setupCells(mode: .observe)
-            self.coreDataFunctions.updateCollectionName(collectionName: self.updatedCollectionName!, nameUID: self.collectionNameUID)
+            self.coreDataFunctions?.updateCollectionName(collectionName: self.updatedCollectionName!, nameUID: self.collectionNameUID)
         }
     }
     
@@ -398,11 +340,11 @@ class PhotoCollectionVC: CollectionViewController {
             alert -> Void in
             
             if (self.getUserDefaultStorageType() == "Cloud"){
-                self.cloudkitOperations.deleteCollection(photoArray: self.photoArray)
+                self.cloudkitOperations!.deleteCollection(photoArray: self.photoArray)
             }
             else {
-                self.coreDataFunctions.deleteCollectionWithUID(uid: self.collectionNameUID)
-                self.coreDataFunctions.deleteCollectionWithUID(uid: self.collectionNameUID)
+                self.coreDataFunctions?.deleteCollectionWithUID(uid: self.collectionNameUID)
+                self.coreDataFunctions?.deleteCollectionWithUID(uid: self.collectionNameUID)
             }
             self.navigationController?.popViewController(animated: true)
             
@@ -421,7 +363,6 @@ class PhotoCollectionVC: CollectionViewController {
         self.view.layer.masksToBounds = true
         self.view.layer.borderColor = UIColor.red.cgColor
         self.view.layer.borderWidth = 5
-        compareButton.isHidden = true
         let cancelButton = UIBarButtonItem(title: "Cancel", style: .done, target: self, action: #selector(cancelPhotoDeletion))
         self.navigationItem.leftBarButtonItem = cancelButton
         self.navigationItem.rightBarButtonItem = nil
@@ -433,54 +374,8 @@ class PhotoCollectionVC: CollectionViewController {
         self.view.layer.borderWidth = 0
         self.navigationItem.leftBarButtonItem = setBackButton()
         self.navigationItem.rightBarButtonItem = collectionOptionsButton()
-        self.compareButton.isHidden = false
     }
     
-    //MARK: Crop and Merge Photos
-    //https://appsbydeb.wordpress.com/2016/01/07/ios-swift-simple-image-cropping-app/
-    
-    @objc func cropAndMergePhotos(){
-//        let step1DirectionsNotice = UIAlertController(title: "Compare and Merge Two Photos", message: "Begin by selecting two photos you would like to compare, side-by-side. This will not change the original chosen photos. After you have finished making your selection, press the Next button.", preferredStyle: .alert)
-//        let okButton = UIAlertAction(title: "Continue", style: .default) { handler in
-//            self.setupCropAndMergeLayout()
-//        }
-//        let cancelButton = UIAlertAction(title: "Cancel", style: .default, handler: nil)
-//        step1DirectionsNotice.addAction(okButton)
-//        step1DirectionsNotice.addAction(cancelButton)
-//        self.present(step1DirectionsNotice, animated: true, completion: nil)
-        
-        self.setupCropAndMergeLayout()
-    }
-    
-    func setupCropAndMergeLayout(){
-        compareButton.isHidden = true
-        photoArray_ObjectsToMerge.removeAll()
-        for index in 0..<photoArray.count {
-            photoArray[index].hideBlurView = false
-        }
-        
-        let cancelButton = UIBarButtonItem(title: "Cancel", style: .done, target: self, action: #selector(cancelCompareMode))
-        self.navigationItem.leftBarButtonItem = cancelButton
-        
-        let compareButton = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(cropAndMergeStep2))
-        self.navigationItem.rightBarButtonItem = compareButton
-        
-        
-        self.setupCells(mode: .merge)
-    }
-    
-    @objc func cropAndMergeStep2(){
-        if (photoArray_ObjectsToMerge.count == 2){
-            let cropMergeVC = Crop_MergeVC()
-            cropMergeVC.photoArray_ObjectsToMerge = self.photoArray_ObjectsToMerge
-            cropMergeVC.index = 0
-            cropMergeVC.cloudkitOperations = cloudkitOperations
-            self.navigationController?.pushViewController(cropMergeVC, animated: true)
-        }
-        else {
-            showSimpleAlertWithTitle("Error", message: "You must only select two photos to crop and merge.", viewController: self)
-        }
-    }
     
     //MARK: UserDefault StorageType
     func getUserDefaultStorageType() -> String{

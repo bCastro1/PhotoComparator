@@ -14,8 +14,6 @@ class PhotoCollectionViewModel: ViewModel<PhotoCollectionCell,PhotoCollectionObj
     override func updateView() {
         self.view?.dateLabel.text = self.model.date.formatDate()
         self.view?.imageView.image = self.model.photo
-        self.view?.trashButton.isUserInteractionEnabled = true
-        self.view?.trashButton.addTarget(self, action: #selector(deleteRecord), for: .touchUpInside)
         self.view?.trashButton.isHidden = true
         self.view?.blurView.isHidden = self.model.hideBlurView
     }
@@ -42,28 +40,6 @@ class PhotoCollectionViewModel: ViewModel<PhotoCollectionCell,PhotoCollectionObj
         self.view?.blurView.isHidden = false
     }
     
-    @objc func deleteRecord(){
-//        do {
-//            try coreDataFunctions.getGuardedContext_setAssets()
-//        } catch {
-//
-//        }
-        
-        
-        print("delet dis")
-        
-        
-//        let container = CKContainer.init(identifier: "iCloud.victoryCloud.PhotoComparator")
-//        let privateDatabase = container.privateCloudDatabase
-//        privateDatabase.delete(withRecordID: self.model.ckrecordID) { (recordID, error) in
-//            if (error != nil){
-//                print("error deleting record: \(String(error!.localizedDescription))")
-//            }
-//            else {
-//                print("record deleted!")
-//            }
-//        }
-    }
     
     
 }

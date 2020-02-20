@@ -23,14 +23,14 @@
 import Foundation
 import Photos
 
-class AssetStore {
-    private(set) var assets: [PHAsset]
+public class AssetStore {
+    public private(set) var assets: [PHAsset]
 
-    init(assets: [PHAsset] = []) {
+    public init(assets: [PHAsset] = []) {
         self.assets = assets
     }
 
-    var count: Int {
+    public var count: Int {
         return assets.count
     }
 

@@ -20,11 +20,7 @@ class PhotoCollectionCell: Cell {
         super.awakeFromNib()
 
         self.dateLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        if #available(iOS 13.0, *) {
-            self.dateLabel.textColor = UIColor.dynamicTextColor
-        } else {
-            self.dateLabel.textColor = UIColor.black
-        }
+        self.dateLabel.textColor = .dynamicText()
         self.imageView.backgroundColor = UIColor.gray
         self.imageView.layer.cornerRadius = 5
         self.imageView.layer.masksToBounds = true

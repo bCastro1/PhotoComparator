@@ -50,18 +50,19 @@ class DropDownStorageOptionView: UIView {
         textLabel.font = UIFont(name: "Headline", size: 16)
         textLabel.font = UIFont.boldSystemFont(ofSize: 16)
         textLabel.textAlignment = .center
+        textLabel.textColor = .secondaryColor()
         textLabel.translatesAutoresizingMaskIntoConstraints = false
         return textLabel
     }()
     
     var downArrow: UILabel = {
-        var arrow = UILabel.labelWithIonicon(.AndroidArrowDropdown, color: .defaultTint, iconSize: 24)
+        var arrow = UILabel.labelWithIonicon(.AndroidArrowDropdown, color: .secondaryColor(), iconSize: 24)
         arrow.translatesAutoresizingMaskIntoConstraints = false
         return arrow
     }()
     
     var upArrow: UILabel = {
-        var arrow = UILabel.labelWithIonicon(.AndroidArrowDropup, color: .defaultTint, iconSize: 24)
+        var arrow = UILabel.labelWithIonicon(.AndroidArrowDropup, color: .secondaryColor(), iconSize: 24)
         arrow.translatesAutoresizingMaskIntoConstraints = false
         return arrow
     }()
@@ -104,7 +105,7 @@ class DropDownStorageOptionTableView: UIView, UITableViewDelegate, UITableViewDa
         
         tableView.dataSource = self
         tableView.delegate = self
-        self.backgroundColor = UIColor.lightGray
+        //self.backgroundColor = UIColor.lightGray
         self.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
@@ -127,17 +128,20 @@ class DropDownStorageOptionTableView: UIView, UITableViewDelegate, UITableViewDa
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell()
         cell.textLabel?.text = dropDownOptions[indexPath.row]
-        if #available(iOS 13.0, *) {
-            cell.textLabel?.textColor = UIColor.dynamicTextColor
-            cell.backgroundColor = UIColor.dynamicBackgroundColor
-        } else {
-            cell.textLabel?.textColor = UIColor.black
-            cell.backgroundColor = UIColor.white
-        }
+//        if #available(iOS 13.0, *) {
+//            cell.textLabel?.textColor = UIColor.dynamicTextColor
+//            cell.backgroundColor = UIColor.dynamicBackgroundColor
+//        } else {
+//            cell.textLabel?.textColor = UIColor.black
+//            cell.backgroundColor = UIColor.white
+//        }
+        
+        cell.textLabel?.textColor = .primaryColor()
+        cell.backgroundColor = .secondaryColor()
         cell.textLabel?.textAlignment = .center
         cell.layer.masksToBounds = true
         cell.layer.cornerRadius = 5
-        cell.layer.borderColor = UIColor.lightGray.cgColor
+        cell.layer.borderColor = UIColor.primaryColor().cgColor
         cell.layer.borderWidth = 1
         return cell
     }

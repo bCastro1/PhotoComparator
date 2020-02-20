@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "ADCF5014F9F63AED85C3E97F0AF03CD7"
-               BuildableName = "CollectionView.framework"
+               BuildableName = "libCollectionView.a"
                BlueprintName = "CollectionView"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>

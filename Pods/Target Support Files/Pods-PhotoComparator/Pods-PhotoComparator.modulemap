@@ -1,4 +1,4 @@
-framework module Pods_PhotoComparator {
+module Pods_PhotoComparator {
   umbrella header "Pods-PhotoComparator-umbrella.h"
 
   export *

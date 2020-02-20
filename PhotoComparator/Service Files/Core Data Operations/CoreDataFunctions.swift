@@ -17,8 +17,12 @@ protocol CoreDataSaveProtocol {
 }
 
 class CoreDataFunctions {
-  //Core Data Service Class
+
+    
+    
+    //MARK: Variable Initiliaztion
     var context: NSManagedObjectContext! = nil
+    
     var conversion_Queue = DispatchQueue(label: "ConversionQueue")
     var save_Queue = DispatchQueue(label: "SaveQueue")
     var photoArray: [MainScreenModel] = [] //main screen vc
@@ -27,23 +31,8 @@ class CoreDataFunctions {
     var collectionFolder_PictureID: String = ""
     var delegate: CoreDataSaveProtocol!
     
-    func setAssets(_ context: NSManagedObjectContext){
+    init (context: NSManagedObjectContext){
         self.context = context
-        conversion_Queue.sync {
-            print("conversionQueue")
-        }
-        save_Queue.sync {
-            print("saveQueue")
-        }
-    }
-    
-    func getGuardedContext_setAssets() throws {
-        guard let appDelegate =
-          UIApplication.shared.delegate as? AppDelegate else {
-          return
-        }
-        context = appDelegate.persistentContainer.viewContext
-        
         conversion_Queue.sync {
             print("conversionQueue")
         }

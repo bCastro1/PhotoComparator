@@ -1,4 +1,4 @@
-framework module CollectionView {
+module CollectionView {
   umbrella header "CollectionView-umbrella.h"
 
   export *

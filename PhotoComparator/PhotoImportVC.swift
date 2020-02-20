@@ -17,7 +17,6 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
     var isFinished: Bool = false
     var progressTotal: Int = 0
 
-    var coreDataContext: NSManagedObjectContext! = nil
     
     let imagePicker = UIImagePickerController()
     var importButtonDisplayPicker = ImportPhotos()
@@ -31,14 +30,28 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
     var uploadButton = UIBarButtonItem()
     var progressView = UploadProgressView()
 
+    var uploadOperationType = importOperationType.newCollection
+    
     //same uid for pictures of same collection
     
     //core data objects
     var collectionName_UIDs: [NSManagedObject] = []
     var ckRecordIDs: [NSManagedObject] = []
 
-    var coreDataFunctions = CoreDataFunctions()
-    var cloudkitOperations = CloudKitFunctions()
+    
+    //MARK: Init
+    var coreDataFunctions: CoreDataFunctions?
+    var cloudkitOperations: CloudKitFunctions?
+    
+    init(coreDataFunctions: CoreDataFunctions, cloudKitOperations: CloudKitFunctions){
+        super.init()
+        self.coreDataFunctions = coreDataFunctions
+        self.cloudkitOperations = cloudKitOperations
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     enum pageCompletionError: Error {
         case invalidPicture
@@ -50,60 +63,46 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
     enum importOperationType {
         case newCollection
         case existingCollection
-        case singlePhotoCollectionAddition
+        case singlePhoto_Existing_CollectionAddition
+        case singlePhoto_New_CollectionAddition
     }
     
     func photoUploadOperations(operation: importOperationType){
+        uploadOperationType = operation
         switch operation {
         case .newCollection:
             //new, random uid
-            UID = UUID().uuidString as NSString
-            uploadButton = UIBarButtonItem(title: "Upload", style: .done, target: self, action: #selector(newCollectionUploadButton))
-            self.navigationItem.rightBarButtonItem = uploadButton
-            self.setupImportPhotoButton()
-            self.importButtonDisplayPicker.addTarget(self, action: #selector(newPhotoImportAction), for: .touchUpInside)
+            self.UID = UUID().uuidString as NSString
+            newCollectionUpload(UID: self.UID)
             break
             
         case .existingCollection:
             //UID should be passed from controller
-            uploadButton = UIBarButtonItem(title: "Upload", style: .done, target: self, action: #selector(existingCollectionUploadButtonPressed))
-            self.navigationItem.rightBarButtonItem = uploadButton
-            self.setupImportPhotoButton()
-            self.importButtonDisplayPicker.addTarget(self, action: #selector(existingPhotoImportAction), for: .touchUpInside)
+            existingCollectionUpload(UID: self.UID)
             break
         
-        case .singlePhotoCollectionAddition:
+        case .singlePhoto_Existing_CollectionAddition:
             //name, UID is passed from previous controller -> photoObjectArray, newCollectionName, UID
             //same as existing colleciton
-            uploadButton = UIBarButtonItem(title: "Upload", style: .done, target: self, action: #selector(singlePhotoUploadButtonPressed))
-            self.navigationItem.rightBarButtonItem = uploadButton
-            self.shouldWaitToSetupCells = true
-            if (mergedPhotoToUpload != nil){
-                //photoObjectArray.append(mergedPhotoToUpload)
-                let picturedObject = PicturedObject(
-                     date: Date() as NSDate,
-                     photo: mergedPhotoToUpload,
-                     id: self.UID)
-                self.photoObjectArray.append(picturedObject)
-            }
+            merged_ExistingCollectionUpload(UID: self.UID)
+            break
+            
+        case .singlePhoto_New_CollectionAddition:
+            //name, uid passed from previous controller
+            merged_NewCollectionUpload(UID: self.UID)
             break
         }
     }
     
-
     
     //MARK: ViewDidLoad
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if #available(iOS 13.0, *) {
-            self.collectionView.backgroundColor = UIColor.dynamicBackgroundColor
-        } else {
-            self.collectionView.backgroundColor = UIColor.white
-        }
+        self.collectionView.backgroundColor = .dynamicBackground()
         
-        coreDataFunctions.delegate = self
-        cloudkitOperations.delegate = self
+        coreDataFunctions?.delegate = self
+        cloudkitOperations?.delegate = self
         self.collectionView.register(PhotoImportCell.self, forCellWithReuseIdentifier: "PhotoImportCell")
         self.setupProgressView()
     }
@@ -151,88 +150,7 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
         self.promptSavedPhotosOrCamera()
     }
     
-    
-    //MARK: Choose photo location prompt
-    //camera or camera roll
-    func promptSavedPhotosOrCamera(){
-        
-        let prompt = UIAlertController(title: "Photo Location", message: "Choose from photo roll or bring up camera now", preferredStyle: .actionSheet)
-        let cameraAction = UIAlertAction(title: "Camera", style: .default) { handler in
-            self.checkCameraStatus()
-        }
-        let photoRoll = UIAlertAction(title: "Saved Photos", style: .default) { handler in
-            self.selectPhotosFromLibrary()
-        }
-        let cancel = UIAlertAction(title: "Cancel", style: .cancel) { handler in
-        }
-        prompt.addAction(cameraAction)
-        prompt.addAction(photoRoll)
-        prompt.addAction(cancel)
-        self.present(prompt, animated: true, completion: nil)
-    }
-    
-    //MARK: Camera permission and usage
-    func checkCameraStatus(){
-        let cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
-        switch cameraAuthorizationStatus {
-            case .notDetermined:
-                requestCameraPermission()
-                break
-            case .authorized:
-                presentCamera()
-                break
-            case .restricted, .denied:
-                cameraAccessNeeded()
-                break
-            default:
-                break
-        }
-    }
-    
-    func requestCameraPermission(){
-        AVCaptureDevice.requestAccess(for: .video, completionHandler: {accessGranted in
-            guard accessGranted == true else { return }
-                self.presentCamera()
-        })
-    }
-    
-    func presentCamera(){
-        #if targetEnvironment(simulator)
-            showSimpleAlertWithTitle("Error", message: "Cannot open the camera using a simulator", viewController: self)
-            self.importButtonDisplayPicker.isHidden = false
-        #else
-            let photoPicker = UIImagePickerController()
-            photoPicker.sourceType = .camera
-            photoPicker.delegate = self
-            self.present(photoPicker, animated: true, completion: nil)
-        #endif
-        
-    }
-    
-    func cameraAccessNeeded(){
-        let settingsAppURL = URL(string: UIApplication.openSettingsURLString)!
-            let alert = UIAlertController(title: "Need Camera Access", message: "Camera access is required to make full use of this app.",preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: nil))
-        
-        alert.addAction(UIAlertAction(title: "Allow Camera", style: .cancel, handler: { (alert) -> Void in
-            UIApplication.shared.open(settingsAppURL, options: [:], completionHandler: nil)
-        }))
-        present(alert, animated: true, completion: nil)
-    }
-    
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]){
-         guard let selectedImage = info[.originalImage] as? UIImage else {
-             fatalError("Expected a dictionary containing an image, but was provided the following: \(info)")
-         }
-        let picturedObject = PicturedObject(
-            date: NSDate(),
-            photo: selectedImage,
-            id: self.UID)
-        self.photoObjectArray.append(picturedObject)
-        self.photoObjectArray.sort(by: { $0.date.compare($1.date as Date) == ComparisonResult.orderedAscending })
-        self.setupCells()
-        dismiss(animated: true, completion: nil)
-     }
+
     
     //MARK: Getting collection name
     @objc func getNewCollectionNameFromUser(){
@@ -252,7 +170,6 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
         prompt.addTextField { (textField : UITextField!) -> Void in
             textField.placeholder = "Photo Collection Name" }
         prompt.addAction(getInput)
-//        prompt.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         prompt.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { handler in
                 self.importButtonDisplayPicker.isHidden = false
         }))
@@ -260,38 +177,13 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
         self.importButtonDisplayPicker.isHidden = true
     }
     
-    //MARK: Selecting photos
-    
-    func selectPhotosFromLibrary(){
-        let vc = BSImagePickerViewController()
-        vc.maxNumberOfSelections = 10
-        bs_presentImagePickerController(vc, animated: true,
-            select: { (asset: PHAsset) -> Void in },
-            deselect: { (asset: PHAsset) -> Void in },
-            cancel: { (assets: [PHAsset]) -> Void in },
-            finish: { (assets: [PHAsset]) -> Void in
-                
-                for pic in assets {
-                    guard let creationDate = pic.creationDate else {return}
-                    guard let image = self.getImageFromPHAsset(pic, size: self.photoSize, deliverMode: .highQualityFormat) else {return}
-                    
-                    let picturedObject = PicturedObject(
-                        date: creationDate as NSDate,
-                        photo: image,
-                        id: self.UID)
-               
-                    self.photoObjectArray.append(picturedObject)
-                }
-                //sorting: oldest first
-                self.photoObjectArray.sort(by: { $0.date.compare($1.date as Date) == ComparisonResult.orderedAscending })
-                self.setupCells()
-        }, completion: nil)
-    }
+
 
     //MARK: setupCells
     
     func setupCells(){
         //laying out selected photos to cells
+        self.progressTotal = self.photoObjectArray.count
         let grid = Grid(columns: 1, margin: UIEdgeInsets(all: 8), padding: .zero)
         let itemsToDisplay = self.photoObjectArray.map { PhotoImportViewModel($0)}
         let photoSection = Section(grid: grid, header: nil, footer: nil, items: itemsToDisplay)
@@ -299,160 +191,8 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
         self.collectionView.reloadData()
     }
 
-    //MARK: Photo helper function
-    
-    func getImageFromPHAsset(_ asset:PHAsset,size:CGSize,deliverMode:PHImageRequestOptionsDeliveryMode)->UIImage?{
-        
-        var returnImage:UIImage? = nil
-        
-        let requestImageOption = PHImageRequestOptions()
-        
-        requestImageOption.deliveryMode = deliverMode
-        
-        requestImageOption.isSynchronous = true
-        
-        let manager = PHImageManager.default()
-        
-        manager.requestImage(for: asset, targetSize:size, contentMode:PHImageContentMode.default, options: requestImageOption) { (image:UIImage?, _) in
-            
-            returnImage = image
-        }
-        return returnImage
-    }
 
-    
-    //MARK: New Collection Upload
-    
-    @objc func newCollectionUploadButton() throws {
-        do {
-            try pageCompletionCheck_NewCollection()
-        }
-        catch pageCompletionError.invalidNameLength {
-            print("error length: \(self.newCollectionName.count) ")
-            let notice = UIAlertController(title: "Error", message: "Proposed group names must be between 6 and 36 characters.", preferredStyle: .alert)
-            notice.addAction(UIAlertAction(title: "Change Name", style: .default, handler: { handler in
-                self.getNewCollectionNameFromUser()
-            }))
-            notice.addAction(UIAlertAction(title: "Cancel Upload", style: .destructive, handler: { handler in
-                self.navigationController?.popViewController(animated: true)
-            }))
-            self.present(notice, animated: true, completion: nil)
-        }
-        catch pageCompletionError.invalidPicture {
-            print("err: pic")
-            showSimpleAlertWithTitle("Picture Error", message: "You must upload at least one photo.", viewController: self)
-        }
-        catch {
-            showSimpleAlertWithTitle("Error", message: "An internal error occurred. Please try again later.", viewController: self)
-            print("err: unexpected")
-        }
-    }
-    
-    func pageCompletionCheck_NewCollection() throws {
-        
-        //character count between 6-24 chars
-        guard newCollectionName.count <= 36 && newCollectionName.count >= 6 else {
-            throw pageCompletionError.invalidNameLength
-        }
-        
-        //user must upload images
-        guard !photoObjectArray.isEmpty else {
-            throw pageCompletionError.invalidPicture
-        }
-        //start upload
 
-        if (getUserDefaultStorageType() == "Cloud"){
-            progressView.isHidden = false
-            progressTotal = photoObjectArray.count
-            
-            cloudkitOperations.uploadPhotoObjectArray(photoArray: photoObjectArray)
-            cloudkitOperations.setFolderInfo(folderName: self.newCollectionName as NSString, nameUID: self.UID, recordID: cloudkitOperations.getTimestampID() as NSString)
-        }
-        else{
-            progressView.isHidden = false
-            progressTotal = photoObjectArray.count
-            
-            coreDataFunctions.savePicturedObjectCollection(photoObjectArray: photoObjectArray, nameUID: self.UID as String)
-            coreDataFunctions.saveNewCollectionInfo(collectionName: self.newCollectionName, nameUID: self.UID as String)
-        }
-        
-        
-    }
-    
-    //MARK: Existing Collection Upload
-    @objc func existingCollectionUploadButtonPressed(){
-        do {
-            try pageCompletionCheck_ExistingCollection()
-            print("success!")
-            print("string id: \(self.newCollectionName)")
-        }
-        catch pageCompletionError.invalidPicture {
-            print("err: pic")
-            showSimpleAlertWithTitle("Picture Error", message: "You must upload at least one photo.", viewController: self)
-        }
-        catch {
-            showSimpleAlertWithTitle("Error", message: "An internal error occurred. Please try again later.", viewController: self)
-            print("err: unexpected")
-        }
-    }
-    
-    func pageCompletionCheck_ExistingCollection() throws {
-        
-        //user must upload images
-        guard !photoObjectArray.isEmpty else {
-            throw pageCompletionError.invalidPicture
-        }
-        
-        //start upload
-
-        if (getUserDefaultStorageType() == "Cloud"){
-            cloudkitOperations.uploadPhotoObjectArray(photoArray: photoObjectArray)
-        }
-        else{
-            coreDataFunctions.savePicturedObjectCollection(photoObjectArray: photoObjectArray, nameUID: self.UID as String)
-        }
-        
-        self.navigationController?.popViewController(animated: true)
-        
-    }
-    
-    //MARK: Single photo upload
-    @objc func singlePhotoUploadButtonPressed(){
-        //used when saving a cropped/comparison photo
-        do {
-            try pageCompletionCheck_SinglePhotoUpload()
-            print("merged photo upload success!")
-        }
-        catch pageCompletionError.invalidNameLength {
-            let notice = UIAlertController(title: "Error", message: "Proposed group names must be between 6 and 36 characters.", preferredStyle: .alert)
-            notice.addAction(UIAlertAction(title: "Change Name", style: .default, handler: { handler in
-                self.getNewCollectionNameFromUser()
-            }))
-        }
-        catch {
-            showSimpleAlertWithTitle("Error", message: "An internal error occurred. Please try again later.", viewController: self)
-            print("err: unexpected")
-        }
-    }
-    
-    func pageCompletionCheck_SinglePhotoUpload() throws {
-        
-        //user must upload images
-        guard newCollectionName.count <= 36 && newCollectionName.count >= 6 else {
-            throw pageCompletionError.invalidNameLength
-        }
-        
-        //start upload
-        if (getUserDefaultStorageType() == "Cloud"){
-            cloudkitOperations.uploadPhotoObjectArray(photoArray: photoObjectArray)
-        }
-        else{
-            coreDataFunctions.savePicturedObjectCollection(photoObjectArray: photoObjectArray, nameUID: self.UID as String)
-        }
-
-        self.navigationController?.popViewControllers(controllersToPop: 2, animated: true)
-    }
-    
     //MARK: UserDefault StorageType
     func getUserDefaultStorageType() -> String{
         return UserDefaults.standard.getDefaultStorageType()
@@ -464,12 +204,27 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
             print("progress: (\(progressInt+1)/\(self.progressTotal))")
             self.progressView.progress(currentIdx: progressInt, total: self.progressTotal)
             if (progressInt+1 == self.progressTotal){
-            self.navigationController?.popViewController(animated: true)
+                if (self.mergedPhotoToUpload == nil){
+                    //self.navigationController?.popViewController(animated: true)
+                    
+                    self.photoObjectArray.removeAll()
+                    self.setupCells()
+                    self.importButtonDisplayPicker.isHidden = false
+                    self.progressView.isHidden = true
+                    self.newCollectionName = ""
+                    self.title = self.newCollectionName
+
+//                    BottomNavigationBar.sharedManager.selectedIndex = 0
+//                    BottomNavigationBar.sharedManager.modalPresentationStyle = .fullScreen
+//                    self.present(BottomNavigationBar.sharedManager, animated: false, completion: nil)
+                }
+                else {
+                    //self.navigationController?.popViewControllers(controllersToPop: 2, animated: true)
+                }
             }
+
         }
     }
-
-    
     
 }
 

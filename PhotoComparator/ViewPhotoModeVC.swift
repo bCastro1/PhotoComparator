@@ -40,7 +40,6 @@ class ViewPhotoModeVC: UIViewController, UIGestureRecognizerDelegate {
         viewPhoto_View = ViewPhoto_View(frame: self.view.bounds)
         self.view.addSubview(viewPhoto_View)
         self.viewPhoto_View.layoutIfNeeded()
-        //viewPhoto_View.imageView.image = photoArray[index].photo
         viewPhoto_View.updateIndex(currentIndex: index, total: photoArray.count)
         
         viewPhoto_View.isUserInteractionEnabled = true

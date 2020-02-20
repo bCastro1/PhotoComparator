@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "1CAEC00F99D9CCA04293B3139152CA5C"
-               BuildableName = "ImageScrollView.framework"
+               BuildableName = "libImageScrollView.a"
                BlueprintName = "ImageScrollView"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>

@@ -8,16 +8,31 @@
 
 import UIKit
 import Foundation
+import CoreData
 
 class CollectionListVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
 
     var collectionFolderTableView: UITableView!
-    var cloudkitOperations = CloudKitFunctions()
     var imageToSave: UIImage!
      
     var photoArray: Array<MainScreenModel> = [] //folder info array
     var photoArray_SearchDuplicate: Array<MainScreenModel> = []
     var newCollectionName: String!
+    
+
+    //MARK: Init
+    var coreDataFunctions: CoreDataFunctions?
+    var cloudkitOperations: CloudKitFunctions?
+    
+    init(coreDataFunctions: CoreDataFunctions, cloudKitOperations: CloudKitFunctions){
+        super.init(nibName: nil, bundle: nil)
+        self.coreDataFunctions = coreDataFunctions
+        self.cloudkitOperations = cloudKitOperations
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     //MARK: viewDidLoad
     override func viewDidLoad() {
@@ -31,7 +46,7 @@ class CollectionListVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         setupViews()
         navigationBarSetup()
         searchBarSetup()
-        getCloudKitCollectionNames()
+        getCollectionFolderNames()
     }
     
     //MARK: Navigation bar setup
@@ -44,8 +59,9 @@ class CollectionListVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         self.navigationItem.rightBarButtonItem = addFolderButton
     }
     
+    //MARK: New folder action
     @objc func newFolderButtonPressed(){
-        let prompt = UIAlertController(title: "New Collection", message: "Please input the name of your new photo collection", preferredStyle: .alert)
+        let prompt = UIAlertController(title: "New Collection", message: "Name of your new photo collection", preferredStyle: .alert)
         
         let getInput = UIAlertAction(title: "Next", style: .default, handler: {
             alert -> Void in
@@ -54,6 +70,14 @@ class CollectionListVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             textField.spellCheckingType = .default
             self.newCollectionName = textField.text ?? ""
             self.title = self.newCollectionName
+            
+            let photoImportVC = PhotoImportVC(coreDataFunctions: self.coreDataFunctions!, cloudKitOperations: self.cloudkitOperations!)
+
+            photoImportVC.title = self.newCollectionName
+            photoImportVC.newCollectionName = self.newCollectionName
+            photoImportVC.mergedPhotoToUpload = self.imageToSave
+            photoImportVC.photoUploadOperations(operation: .singlePhoto_New_CollectionAddition)
+            self.navigationController?.pushViewController(photoImportVC, animated: true)
         })
         prompt.addTextField { (textField : UITextField!) -> Void in
             textField.placeholder = "Photo Collection Name" }
@@ -62,9 +86,35 @@ class CollectionListVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         self.present(prompt, animated: true, completion: nil)
     }
     
+    //MARK: Storage type; get names
+    
+    func getUserDefaultStorageType() -> String{
+        return UserDefaults.standard.getDefaultStorageType()
+    }
+    
+    func getCollectionFolderNames(){
+        if (getUserDefaultStorageType() == "Cloud"){
+            getCloudKitCollectionNames()
+        }
+        else{
+            getCoreDataCollectionNames()
+        }
+    }
+    
+    //MARK: Get CD collection names
+    private func getCoreDataCollectionNames(){
+        guard let unwrappedPhotoArray = self.coreDataFunctions?.photoArray else {return}
+        self.photoArray = unwrappedPhotoArray
+        self.photoArray.sort{$0.name<$1.name} //alphabetize
+        self.photoArray_SearchDuplicate = self.photoArray
+        collectionFolderTableView.reloadData()
+    }
+    
     //MARK: Get CK collection names
-    func getCloudKitCollectionNames(){
-        self.photoArray = self.cloudkitOperations.photoArray
+    private func getCloudKitCollectionNames(){
+        guard let phoArray = self.cloudkitOperations?.photoArray else {return}
+        self.photoArray = phoArray
+        self.photoArray.sort{$0.name<$1.name}
         self.photoArray_SearchDuplicate = self.photoArray
         collectionFolderTableView.reloadData()
     }
@@ -93,12 +143,12 @@ class CollectionListVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let photoImportVC = PhotoImportVC(nibName: nil, bundle: nil)
+        let photoImportVC = PhotoImportVC(coreDataFunctions: self.coreDataFunctions!, cloudKitOperations: self.cloudkitOperations!)
+        
         let photoModel = photoArray[indexPath.row]
-        photoImportVC.cloudkitOperations = self.cloudkitOperations
-        photoImportVC.UID = photoModel.id as NSString
+        photoImportVC.UID = photoModel.nameUID as NSString
         photoImportVC.mergedPhotoToUpload = imageToSave
-        photoImportVC.photoUploadOperations(operation: .singlePhotoCollectionAddition)
+        photoImportVC.photoUploadOperations(operation: .singlePhoto_Existing_CollectionAddition)
         photoImportVC.newCollectionName = photoModel.name
         photoImportVC.title = "\(photoModel.name)"
         photoImportVC.shouldWaitToSetupCells = true

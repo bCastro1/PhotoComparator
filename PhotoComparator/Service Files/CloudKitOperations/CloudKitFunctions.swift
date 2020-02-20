@@ -33,7 +33,11 @@ class CloudKitFunctions {
         self.photoObjectArray = photoArray
         uploadObjectsToCloudKit()
     }
-
+    
+    init(){
+        initalizeCloudKitFolders()
+    }
+    
     //MARK: Preparing photos for upload
     
     private func uploadObjectsToCloudKit(){
@@ -194,8 +198,18 @@ class CloudKitFunctions {
 
     
     //MARK: Get Main Page Folders
+    func initalizeCloudKitFolders(){
+        self.getMainPageFolders { (collectionFoldersInfo) in
+            guard let folderArray = collectionFoldersInfo else {return}
+            self.collectionFolderArray = folderArray
+            self.getCollectionFolderRecords(folderArray) { (collectionFolderRecords) -> Void in
+                guard let folders = collectionFolderRecords else {return}
+                self.photoArray = folders
+            }
+        }
+    }
     
-    func getMainPageFolders(completionHandler:@escaping (_ collectionFolders: [CollectionFolderModel]?)-> Void){
+    private func getMainPageFolders(completionHandler:@escaping (_ collectionFolders: [CollectionFolderModel]?)-> Void){
         let container = CKContainer.init(identifier: "iCloud.victoryCloud.PhotoComparator")
         let privateDatabase = container.privateCloudDatabase
         let predicate = NSPredicate(value: true) //Get all collection folders
@@ -224,7 +238,7 @@ class CloudKitFunctions {
        }
     }
     
-    func getCollectionFolderRecords(_ collectionModelArray: [CollectionFolderModel], completionHandler : @escaping ((_ mainFolders:Array<MainScreenModel>?) -> Void)){
+    private func getCollectionFolderRecords(_ collectionModelArray: [CollectionFolderModel], completionHandler : @escaping ((_ mainFolders:Array<MainScreenModel>?) -> Void)){
         var recordIDs: [CKRecord.ID] = []
         for record in collectionModelArray {
             recordIDs.append(CKRecord.ID(recordName: record.picturedObjectRecordID as String))

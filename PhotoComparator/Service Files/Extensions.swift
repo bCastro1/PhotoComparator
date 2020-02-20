@@ -13,8 +13,68 @@ import UIKit
 extension UIColor {
     static let defaultTint = UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1)
     
+    private static let primaryThemeColor = UIColor(red: 255/255, green: 191/255, blue: 136/255, alpha: 1) //orange peachy
+    private static let secondaryThemeColor = UIColor(red: 4/255, green: 57/255, blue: 60/255, alpha: 1) //dark blue
+//    static let highlightColor = UIColor(red: 190/255, green: 0/255, blue: 0/255, alpha: 1)
+    //color blind?
+    
+    static func primaryColor() -> UIColor {
+        if #available(iOS 13.0, *) {
+            return .dynamicPrimaryTheme
+        } else {
+            return .primaryThemeColor
+        }
+    }
+    
+    static func secondaryColor() -> UIColor {
+        if #available(iOS 13.0, *) {
+            return .dynamicSecondaryTheme
+        } else {
+            return .secondaryThemeColor
+        }
+    }
+    
+    
     @available(iOS 13.0, *)
-    static let dynamicBackgroundColor = UIColor { (traitCollection: UITraitCollection) -> UIColor in
+    private static let dynamicPrimaryTheme = UIColor { (traitCollection: UITraitCollection) -> UIColor in
+            switch traitCollection.userInterfaceStyle {
+            case .unspecified, .light: return .primaryThemeColor
+            case .dark: return .secondaryThemeColor
+            @unknown default:
+                fatalError()
+        }
+    }
+    
+    @available(iOS 13.0, *)
+    private static let dynamicSecondaryTheme = UIColor { (traitCollection: UITraitCollection) -> UIColor in
+            switch traitCollection.userInterfaceStyle {
+            case .unspecified, .light: return .secondaryThemeColor
+            case .dark: return .primaryThemeColor
+            @unknown default:
+                fatalError()
+        }
+    }
+    
+    
+    static func dynamicBackground() -> UIColor {
+        if #available(iOS 13.0, *) {
+            return .dynamicBackgroundColor
+        } else {
+            return .white
+        }
+    }
+    
+    static func dynamicText() -> UIColor {
+        if #available(iOS 13.0, *) {
+            return .dynamicTextColor
+        } else {
+            return .black
+        }
+    }
+    
+    @available(iOS 13.0, *)
+    //graphite color when in dark mode, pale white in light mode
+    private static let dynamicBackgroundColor = UIColor { (traitCollection: UITraitCollection) -> UIColor in
             switch traitCollection.userInterfaceStyle {
             case .unspecified, .light: return UIColor(red: 220/255, green: 220/255, blue: 220/255, alpha: 1.0)
             case .dark: return UIColor(red: 40/255, green: 40/255, blue: 40/255, alpha: 1.0)
@@ -23,7 +83,8 @@ extension UIColor {
         }
     }
     @available(iOS 13.0, *)
-    static let dynamicTextColor = UIColor { (traitCollection: UITraitCollection) -> UIColor in
+    //opposite of dynamic BG color
+    private static let dynamicTextColor = UIColor { (traitCollection: UITraitCollection) -> UIColor in
             switch traitCollection.userInterfaceStyle {
             case .unspecified, .light: return UIColor(red: 40/255, green: 40/255, blue: 40/255, alpha: 1.0)
             case .dark: return UIColor(red: 220/255, green: 220/255, blue: 220/255, alpha: 1.0)

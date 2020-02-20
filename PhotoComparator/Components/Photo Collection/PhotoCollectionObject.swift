@@ -17,5 +17,4 @@ struct PhotoCollectionObject {
     let name: String
     var ckrecordID: CKRecord.ID
     var hideBlurView: Bool
-    
 }
