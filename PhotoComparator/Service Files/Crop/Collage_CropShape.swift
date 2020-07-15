@@ -28,17 +28,17 @@ struct Collage_CropShape{
         case "2a":
             switch index {
             case 0,1:
-                cropType = CROP_TYPE.rect3x4
+                cropType = CROP_TYPE.square2x1
             default:
-                cropType = CROP_TYPE.square
+                cropType = CROP_TYPE.square2x1
             }
             break
         case "2b":
             switch index {
             case 0,1:
-                cropType = CROP_TYPE.rect4x3
+                cropType = CROP_TYPE.square1x2
             default:
-                cropType = CROP_TYPE.square
+                cropType = CROP_TYPE.square1x2
             }
             break
         //MARK: 3 pic layouts
@@ -47,14 +47,14 @@ struct Collage_CropShape{
             case 0,1:
                 cropType = CROP_TYPE.square
             case 2:
-                cropType = CROP_TYPE.rect4x3
+                cropType = CROP_TYPE.square1x2
             default:
                 cropType = CROP_TYPE.square
             }
         case "3b":
             switch index {
             case 0:
-                cropType = CROP_TYPE.rect4x3
+                cropType = CROP_TYPE.square1x2
             case 1,2:
                 cropType = CROP_TYPE.square
             default:

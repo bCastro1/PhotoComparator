@@ -11,7 +11,10 @@ import Foundation
 import CoreData
 import CloudKit
 
-class PhotoCollectionVC: CollectionViewController {
+class PhotoCollectionVC: CollectionViewController, PhotoComparisonProtocol {
+    
+    var photoComparisonIndex: Int = 0
+    var shouldComparePhotos: Bool = false
     
     //MARK: Variable Declaration
     var collectionNameUID: String = ""
@@ -61,14 +64,20 @@ class PhotoCollectionVC: CollectionViewController {
         self.navigationItem.rightBarButtonItem = collectionOptionsButton()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        if (getUserDefaultStorageType() == "Cloud"){
-            fetchRecordFromCloud()
+
+    
+    override func viewDidAppear(_ animated: Bool) {
+        if (shouldComparePhotos){
+            shouldComparePhotos = false
+            let cameraVC = CameraCaptureVC(
+                coreDataFunctions: self.coreDataFunctions!,
+                cloudKitOperations: self.cloudkitOperations!,
+                comparisonPhoto: self.photoArray[photoComparisonIndex].photo, AlbumUID: collectionNameUID as NSString, AlbumName: self.photoArray[photoComparisonIndex].name)
+            cameraVC.hidesBottomBarWhenPushed = true
+            self.navigationController?.pushViewController(cameraVC, animated: true)
         }
-        else {
-            fetchCollectionFromCoreData()
-        }
-        
+        self.navigationController?.navigationBar.isHidden = false
+        albumDataFetch()
     }
     
     //MARK: Cell Setup
@@ -85,10 +94,10 @@ class PhotoCollectionVC: CollectionViewController {
                 .onSelect{ [weak self]  viewModel in
                     switch mode {
                     case .observe:
-                        let photoView = ViewPhotoModeVC(nibName: nil, bundle: nil)
+                        let photoView = ViewPhotoModeVC(coreDataFunctions: (self?.coreDataFunctions)!, cloudKitOperations: (self?.cloudkitOperations)!, photoCollectionVC: self!)
                         photoView.photoArray = self!.photoArray
                         photoView.index = viewModel.indexPath.row
-                        photoView.modalPresentationStyle = .overFullScreen
+                        photoView.modalPresentationStyle = .fullScreen
                         self?.present(photoView, animated: false, completion: nil)
                     case .compare:
                         viewModel.model.hideBlurView.toggle()
@@ -130,7 +139,7 @@ class PhotoCollectionVC: CollectionViewController {
                                     print("cant delete folder picture CD")
                                 }
                             }
-    
+                            self?.albumDataFetch()
                         })
                         
                         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
@@ -160,7 +169,14 @@ class PhotoCollectionVC: CollectionViewController {
         self.collectionView.reloadData()
     }
     
-    
+    func albumDataFetch(){
+        if (getUserDefaultStorageType() == "Cloud"){
+            fetchRecordFromCloud()
+        }
+        else {
+            fetchCollectionFromCoreData()
+        }
+    }
 
     //MARK: CloudKit Data Fetch
     
@@ -240,7 +256,7 @@ class PhotoCollectionVC: CollectionViewController {
     
     //MARK: Show options menu
     @objc func showMoreOptions(){
-        let moreOptionsAlert = UIAlertController(title: "Collection Options", message: "", preferredStyle: .actionSheet)
+        let moreOptionsAlert = UIAlertController(title: "Album Options", message: "", preferredStyle: .actionSheet)
         
         let importNewPhotosOption = UIAlertAction(title: "Import More Photos", style: .default) { handler in
             self.importNewPhotos()
@@ -268,9 +284,9 @@ class PhotoCollectionVC: CollectionViewController {
     //MARK: Import new photo
     func importNewPhotos(){
         let photoImportVC = PhotoImportVC(coreDataFunctions: coreDataFunctions!, cloudKitOperations: self.cloudkitOperations!)
-        photoImportVC.photoUploadOperations(operation: .existingCollection)
         photoImportVC.newCollectionName = self.photoModel.name
         photoImportVC.title = "\(self.photoModel.name)"
+        photoImportVC.photoUploadOperations(operation: .existingCollection, uid: self.collectionNameUID as NSString)
         self.navigationController?.pushViewController(photoImportVC, animated: true)
     }
     
@@ -307,7 +323,7 @@ class PhotoCollectionVC: CollectionViewController {
              showSimpleAlertWithTitle("Error", message: "The colleciton name must be between 6 and 24 characters.", viewController: self)
         }
         catch {
-            showSimpleAlertWithTitle("Error", message: "Collection name could not be updated at this time. Please try again later.", viewController: self)
+            showSimpleAlertWithTitle("Error", message: "Album name could not be updated at this time. Please try again later.", viewController: self)
         }
     }
     
@@ -328,7 +344,6 @@ class PhotoCollectionVC: CollectionViewController {
             self.coreDataFunctions?.updateCollectionName(collectionName: self.updatedCollectionName!, nameUID: self.collectionNameUID)
         }
     }
-    
     
     //MARK: Delete collection action
     
@@ -374,6 +389,7 @@ class PhotoCollectionVC: CollectionViewController {
         self.view.layer.borderWidth = 0
         self.navigationItem.leftBarButtonItem = setBackButton()
         self.navigationItem.rightBarButtonItem = collectionOptionsButton()
+        setupCells(mode: .observe)
     }
     
     

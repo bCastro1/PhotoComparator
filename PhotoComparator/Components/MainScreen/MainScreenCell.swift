@@ -21,6 +21,8 @@ class MainScreenCell: Cell {
         self.imageView.backgroundColor = UIColor.gray
         self.imageView.layer.cornerRadius = 8
         self.imageView.layer.masksToBounds = true
+        
+        self.imageView.contentMode = .scaleAspectFill
     }
     
     override func reset() {

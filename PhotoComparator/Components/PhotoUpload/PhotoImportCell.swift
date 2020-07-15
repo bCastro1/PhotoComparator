@@ -22,6 +22,7 @@ class PhotoImportCell: Cell {
         self.imageView.backgroundColor = UIColor.white
         self.imageView.layer.cornerRadius = 5
         self.imageView.layer.masksToBounds = true
+        self.imageView.contentMode = .scaleAspectFit
     }
     
     override func reset(){

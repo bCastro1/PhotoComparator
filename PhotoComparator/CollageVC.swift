@@ -30,10 +30,13 @@ class CollageVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .dynamicBackground()
-        self.title = "Collage"
         setupPage()
         startButton.addTarget(self, action: #selector(startCollageButtonPressed), for: .touchUpInside)
-
+    }
+    
+    //MARK: ViewWill(Dis)Appear
+    override func viewWillAppear(_ animated: Bool) {
+        self.navigationItem.title = "Collage"
     }
 
     

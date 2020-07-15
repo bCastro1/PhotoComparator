@@ -10,16 +10,32 @@ import UIKit
 import Foundation
 import ImageScrollView
 
-class ViewPhotoModeVC: UIViewController, UIGestureRecognizerDelegate {
+class ViewPhotoModeVC: UIViewController, UIGestureRecognizerDelegate  {
+    
 
     var viewPhoto_View = ViewPhoto_View()
     var photoArray: Array<PhotoCollectionObject> = []
     var index: Int = 0
     var isZooming = false
     var originalImageCenter:CGPoint?
+    var coreDataFunctions: CoreDataFunctions?
+    var cloudkitOperations: CloudKitFunctions?
+    var photoCollectionVC: PhotoCollectionVC?
     
     var shouldHideExitButton = false
     var shouldHideIndexLabel = false
+    
+    
+    init(coreDataFunctions: CoreDataFunctions, cloudKitOperations: CloudKitFunctions, photoCollectionVC: PhotoCollectionVC){
+        super.init(nibName: nil, bundle: nil)
+        self.coreDataFunctions = coreDataFunctions
+        self.cloudkitOperations = cloudKitOperations
+        self.photoCollectionVC = photoCollectionVC
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,8 +56,8 @@ class ViewPhotoModeVC: UIViewController, UIGestureRecognizerDelegate {
         viewPhoto_View = ViewPhoto_View(frame: self.view.bounds)
         self.view.addSubview(viewPhoto_View)
         self.viewPhoto_View.layoutIfNeeded()
+        viewPhoto_View.delegate = photoCollectionVC
         viewPhoto_View.updateIndex(currentIndex: index, total: photoArray.count)
-        
         viewPhoto_View.isUserInteractionEnabled = true
     
 
@@ -65,7 +81,7 @@ class ViewPhotoModeVC: UIViewController, UIGestureRecognizerDelegate {
 
         viewPhoto_View.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(exitToggle)))
         viewPhoto_View.exitButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(exitPhotoView)))
-        
+        viewPhoto_View.cameraButton.addTarget(self, action: #selector(takeProgressPictureAction), for: .touchUpInside)
     }
 
     //MARK: UDLR gestures
@@ -127,6 +143,10 @@ class ViewPhotoModeVC: UIViewController, UIGestureRecognizerDelegate {
         viewPhoto_View.exitButton.isHidden = shouldHideExitButton
         shouldHideIndexLabel.toggle()
         viewPhoto_View.indexLabel.isHidden = shouldHideIndexLabel
+    }
+    
+    @objc func takeProgressPictureAction(){
+        self.dismiss(animated: false, completion: nil)
     }
 }
 

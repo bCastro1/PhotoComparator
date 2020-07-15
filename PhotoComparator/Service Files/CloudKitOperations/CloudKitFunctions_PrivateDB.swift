@@ -38,6 +38,22 @@ class CloudKitFunctions {
         initalizeCloudKitFolders()
     }
     
+    // async gets iCloud record ID object of logged-in iCloud user
+    func iCloudUserIDAsync(complete: @escaping (_ instance: CKRecord.ID?, _ error: NSError?) -> ()) {
+            let container = CKContainer.init(identifier: "iCloud.victoryCloud.PhotoComparator")
+            container.fetchUserRecordID() {
+                recordID, error in
+                if error != nil {
+                    print(error!.localizedDescription)
+                    complete(nil, error as NSError?)
+                } else {
+                    print("fetched ID: \(recordID?.recordName ?? "nil recordName")")
+                    complete(recordID, nil)
+                }
+            }
+        }
+
+    
     //MARK: Preparing photos for upload
     
     private func uploadObjectsToCloudKit(){
@@ -96,7 +112,7 @@ class CloudKitFunctions {
             //if first date and oldest picture, use as photo folder header
             self.firstObjectTimestampIDforCoreData = String(timestampParts[0])
         }
-        
+
         let container = CKContainer.init(identifier: "iCloud.victoryCloud.PhotoComparator")
         let privateDatabase = container.privateCloudDatabase
         
@@ -274,6 +290,4 @@ class CloudKitFunctions {
             }
         }
     }
-
-
 }

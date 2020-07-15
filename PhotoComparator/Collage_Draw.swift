@@ -16,7 +16,7 @@ protocol Collage_Draw_Protocol {
 
 class Collage_Draw {
     
-    enum CollageLayout: String {
+    private enum CollageLayout: String {
         case _2a = "2a"
         case _2b = "2b"
         case _3a = "3a"
@@ -49,6 +49,24 @@ class Collage_Draw {
     var finalCollage: UIImage?
     var collageFinishCheck: Bool = true
     
+//    //MARK: Date Label component
+//    var dateLabel: UILabel = {
+//        var label = UILabel()
+//        label.textAlignment = .center
+//        label.numberOfLines = 0
+//        label.layer.masksToBounds = true
+//        label.layer.cornerRadius = 5
+//        label.layer.borderColor = UIColor.white.cgColor
+//        label.layer.borderWidth = 1
+//        label.textColor = .white
+//        label.backgroundColor = .darkGray
+//        label.adjustsFontSizeToFitWidth = true
+//        label.minimumScaleFactor = 0.5
+//        label.translatesAutoresizingMaskIntoConstraints = false
+//        return label
+//    }()
+    
+    //MARK: Initialization
     init (frameWidth: CGFloat, frameHeight: CGFloat, layout: String){
         self.frameWidth = frameWidth
         self.frameHeight = frameHeight
@@ -249,8 +267,131 @@ class Collage_Draw {
         let newImage:UIImage = UIGraphicsGetImageFromCurrentImageContext()!
         UIGraphicsEndImageContext()
         finalCollage = newImage
-        
         delegate.collageFinishCheck(collageFinishCheck)
+        
+        if (collageFinishCheck){
+            //finished collage, draw date label
+            setAndDrawDateLabel()
+        }
+    }
+    
+    
+    
+    //MARK: Draw Date Label
+    private func setAndDrawDateLabel(){
+        
+        if let firstDate = self.collageObjects.first?.photoWithMetaData.date,
+            let secondDate = self.collageObjects.last?.photoWithMetaData.date
+        {
+            var earlierDate: NSDate!
+            var laterDate: NSDate!
+            if (firstDate < secondDate){
+                earlierDate = firstDate
+                laterDate = secondDate
+            }
+            else {
+                earlierDate = secondDate
+                laterDate = firstDate
+            }
+            let dateText = "(\(earlierDate.formatDate()) - \(laterDate.formatDate())) \n\(timeFrom(lhs: earlierDate, rhs: laterDate))"
+            
+            let scale = UIScreen.main.scale
+            UIGraphicsBeginImageContextWithOptions(CGSize(width: self.frameWidth, height: self.frameHeight), false, scale)
+            let paragraphStyle: NSMutableParagraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.alignment = NSTextAlignment.center
+            
+            let textFontAttributes = [
+                NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 22),
+                NSAttributedString.Key.foregroundColor: UIColor.white,
+                NSAttributedString.Key.strokeColor: UIColor.black,
+                NSAttributedString.Key.strokeWidth: -6,
+                NSAttributedString.Key.paragraphStyle : paragraphStyle,
+                ] as [NSAttributedString.Key : Any]
+            let dateString = NSAttributedString(string: dateText, attributes: textFontAttributes)
+            let largestSize = CGSize(width: self.frameWidth-30, height: .greatestFiniteMagnitude)
+            
+            finalCollage!.draw(in: CGRect(origin: CGPoint.zero, size: finalCollage!.size))
+            
+            let framesetter = CTFramesetterCreateWithAttributedString(dateString)
+            let textSize = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, CFRange(), nil, largestSize, nil)
+
+//            let labelXpos = self.frameWidth/2 - textSize.width/2
+//            let labelYpos = self.frameHeight/2 - textSize.height/2
+            let (xPos,yPos) = returnLabelPosition(textSize: textSize)
+            
+            let rect = CGRect(x: xPos, y: yPos, width: textSize.width, height: textSize.height)
+            dateText.draw(in: rect, withAttributes: textFontAttributes)
+
+            let newImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            finalCollage = newImage
+        }
+    }
+    
+    private func returnLabelPosition(textSize: CGSize)-> (LabelXpos: CGFloat, LabelYpos: CGFloat){
+        // ( labelXpos : labelYpos )
+        var x = CGFloat()
+        var y = CGFloat()
+        
+        switch chosenLayout {
+            //MARK: 2a
+            case "2a":
+                //bottom middle
+                x = self.frameWidth/2 - textSize.width/2
+                y = (self.frameHeight-25) - textSize.height/2
+            
+            //MARK: 2b
+            case "2b":
+                //centered
+                x = self.frameWidth/2 - textSize.width/2
+                y = self.frameHeight/2 - textSize.height/2
+            
+            //MARK: 3a
+            case "3a":
+                x = self.frameWidth/2 - textSize.width/2
+                y = (self.frameHeight/2-25) - textSize.height/2
+            
+            //MARK: 3b
+            case "3b":
+                x = self.frameWidth/2 - textSize.width/2
+                y = (self.frameHeight/2+25) - textSize.height/2
+
+            //MARK: 3c
+            case "3c":
+                x = self.frameWidth/2 - textSize.width/2
+                y = (self.frameHeight-25) - textSize.height/2
+            
+            //MARK: 3d
+            case "3d":
+                x = self.frameWidth/2 - textSize.width/2
+                y = (self.frameHeight-25) - textSize.height/2
+            
+            //MARK: 4a
+            case "4a":
+                x = self.frameWidth/2 - textSize.width/2
+                y = self.frameHeight/2 - textSize.height/2
+            
+            //MARK: 4b
+            case "4b":
+                x = self.frameWidth/2 - textSize.width/2
+                y = (self.frameHeight*0.66) - textSize.height/2
+            
+            //MARK: 4c
+            case "4c":
+                x = self.frameWidth/2 - textSize.width/2
+                y = (self.frameHeight*0.33) - textSize.height/2
+
+            //MARK: 4d
+            case "4d":
+                x = self.frameWidth/2 - textSize.width/2
+                y = (self.frameHeight-25) - textSize.height/2
+
+            default:
+                x = self.frameWidth/2 - textSize.width/2
+                y = self.frameHeight/2 - textSize.height/2
+        }
+        
+        return (x,y)
     }
 }
 

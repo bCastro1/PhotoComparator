@@ -61,6 +61,7 @@ extension PhotoImportVC {
     //MARK: Error handling
     
     @objc func uploadButtonPressed() {
+        self.dismissTutorialView()
         do {
             try pageCompletionCheck_FinishUpload(operation: uploadOperationType)
         }
@@ -151,5 +152,9 @@ extension PhotoImportVC {
             }
             break
         }
+        
+        UserDefaults.standard.setTutorialDefault(value: "hide", tutorialType: .album)
     }
+    
+    
 }

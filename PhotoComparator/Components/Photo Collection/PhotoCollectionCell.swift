@@ -24,7 +24,7 @@ class PhotoCollectionCell: Cell {
         self.imageView.backgroundColor = UIColor.gray
         self.imageView.layer.cornerRadius = 5
         self.imageView.layer.masksToBounds = true
-        
+        self.imageView.contentMode = .scaleAspectFill
         self.trashButton.setImage(UIImage.imageWithIonicon(.iOSTrash, color: .defaultTint, iconSize: 40, imageSize: CGSize(width: 40, height: 40)), for: .normal)
         
         blurView.alpha = 0.5

@@ -1,21 +1,20 @@
 //
-//  CollageLayoutViewModel.swift
+//  ExploreViewModel.swift
 //  PhotoComparator
 //
-//  Created by Brendan Castro on 1/31/20.
+//  Created by Brendan Castro on 3/26/20.
 //  Copyright © 2020 Brendan Castro. All rights reserved.
 //
 
-import Foundation
 import UIKit
 
-class CollageLayoutViewModel: ViewModel<CollageLayoutCell, CollageLayoutModel>{
+class ExploreViewModel: ViewModel<ExploreCell, ExploreModel> {
     
     override func updateView() {
-        self.view?.textLabel.text = self.model.name
-        self.view?.imageView.image = UIImage(named: self.model.image)
+        self.view?.ratingLabel.text = String(self.model.rating)
+        self.view?.dateLabel.text = self.model.date.formatDate_DayMonth()
+        self.view?.imageView.image = self.model.image
     }
-    
     
     override func size(grid: Grid) -> CGSize {
         if (self.collectionView.traitCollection.userInterfaceIdiom == .phone &&
@@ -30,6 +29,10 @@ class CollageLayoutViewModel: ViewModel<CollageLayoutCell, CollageLayoutModel>{
         else if grid.columns == 3 {
             //makes text label disappear ...?
             return grid.size(for: self.collectionView, ratio: 1.0)
+        }
+        else if grid.columns == 4 {
+            //makes text label disappear ...?
+            return grid.size(for: self.collectionView, ratio: 0.9)
         }
         return grid.size(for: self.collectionView, ratio: 1.2, items: grid.columns / 2, gaps: grid.columns - 1)
     }

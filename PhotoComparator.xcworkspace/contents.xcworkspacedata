@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:/Users/brendanc/Desktop/PhotoComparator/PhotoComparator/Service Files/CloudKitOperations/CloudKitFunctions_PublicDB.swift">
+   </FileRef>
+   <FileRef
       location = "group:PhotoComparator/Service Files/Core Data Operations/CollectionNameInfo+CoreDataClass.swift">
    </FileRef>
    <FileRef

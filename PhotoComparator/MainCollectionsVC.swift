@@ -53,7 +53,7 @@ class MainCollectionsVC: CollectionViewController, DropDownProtocol {
         self.collectionView.register(MainScreenCell.self, forCellWithReuseIdentifier: "MainScreenCell")
         
         optionViewFrame.delegate = self
-        
+        setupImportPhotoButton()
         setupStorageTitleOptionView()
         optionViewFrame.dropDownOptions = ["CloudKit Storage","Local Storage"]
     }
@@ -62,8 +62,40 @@ class MainCollectionsVC: CollectionViewController, DropDownProtocol {
         super.viewWillAppear(animated)
         photoArray.removeAll()
         getStorageTypeFromMemory() //dataSource from cloud or local mem
+        self.tabBarController?.navigationController?.isNavigationBarHidden = true
+        self.navigationItem.titleView = storageOptionView
+        self.navigationItem.leftBarButtonItem = refreshButton
+        self.navigationController?.navigationBar.isHidden = false
+        tutorialViewSetup()
+    }
+    override func viewWillDisappear(_ animated: Bool) {
+        self.tutorialView.removeFromSuperview()
     }
     
+    var tutorialView = Tutorial_View()
+    
+    
+    //MARK: Tutorial View
+    func tutorialViewSetup(){
+        if (UserDefaults.standard.getTutorialDefault(tutorialType: .album) == "show"){
+            //if show tutorial is true
+            tutorialView = Tutorial_View(frame: self.view.frame, tutorialTextID: .addAlbum)
+            tutorialView.translatesAutoresizingMaskIntoConstraints = false
+            self.view.addSubview(tutorialView)
+            self.tutorialView.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
+            self.tutorialView.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
+            self.tutorialView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
+            self.tutorialView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+            self.view.bringSubviewToFront(tutorialView)
+            
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissTutorialView))
+            self.tutorialView.addGestureRecognizer(tapGesture)
+        }
+    }
+    
+    @objc func dismissTutorialView(){
+        self.tutorialView.removeFromSuperview()
+    }
     
     //MARK: Storage Type functions
     func getStorageTypeFromMemory(){
@@ -104,6 +136,7 @@ class MainCollectionsVC: CollectionViewController, DropDownProtocol {
     func setUserDefaultStorageType(_ type: String){
         UserDefaults.standard.setDefaultStorageType(value: type)
     }
+    
     
     //MARK: Fetch Data From CloudKit
     
@@ -169,7 +202,7 @@ class MainCollectionsVC: CollectionViewController, DropDownProtocol {
     //MARK: Nav Button Setup
     func setupStorageTitleOptionView(){
         storageOptionView.isUserInteractionEnabled = true
-        self.navigationItem.titleView = storageOptionView
+
         self.view.addSubview(optionViewFrame)
         self.view.bringSubviewToFront(optionViewFrame)
         optionViewFrame.translatesAutoresizingMaskIntoConstraints = false
@@ -189,12 +222,12 @@ class MainCollectionsVC: CollectionViewController, DropDownProtocol {
             //menu open
             storageOptionView.changeArrowDirection(direction: .up)
             NSLayoutConstraint.deactivate([self.optionViewHeightConstraint])
-            if (self.optionViewFrame.tableView.contentSize.height > 150) {
-                self.optionViewHeightConstraint.constant = 100
-            }
-            else {
+//            if (self.optionViewFrame.tableView.contentSize.height > 100) {
+//                self.optionViewHeightConstraint.constant = 100
+//            }
+//            else {
                 self.optionViewHeightConstraint.constant = self.optionViewFrame.tableView.contentSize.height
-            }
+//            }
             
             NSLayoutConstraint.activate([self.optionViewHeightConstraint])
             
@@ -248,7 +281,6 @@ class MainCollectionsVC: CollectionViewController, DropDownProtocol {
         refreshButton.tintColor = .secondaryColor()
         refreshButton.setTitleTextAttributes(attributes, for: .normal)
         refreshButton.setTitleTextAttributes(attributes, for: .highlighted)
-        self.navigationItem.leftBarButtonItem = refreshButton
     }
     
     @objc func refreshButtonAction(){
@@ -267,6 +299,44 @@ class MainCollectionsVC: CollectionViewController, DropDownProtocol {
              self.collectionView.reloadData()
         })
     }
+    
+    //MARK: Import photos
+    func setupImportPhotoButton(){
+        let importButton = UIBarButtonItem(title: ionicon.AndroidAdd.rawValue, style: .plain, target: self, action: #selector(importPhotoButtonAction))
+        let attributes = [NSAttributedString.Key.font: UIFont.ioniconFontOfSize(26)] as Dictionary
+        importButton.tintColor = .secondaryColor()
+        importButton.setTitleTextAttributes(attributes, for: .normal)
+        importButton.setTitleTextAttributes(attributes, for: .highlighted)
+        
+        navigationItem.rightBarButtonItem = importButton
+    }
+    
+    @objc func importPhotoButtonAction(){
+        var newAlbumName: String = ""
+        
+        let prompt = UIAlertController(title: "New Album", message: "Please input the name of your new photo album", preferredStyle: .alert)
+        
+        let getInput = UIAlertAction(title: "Next", style: .default, handler: {
+            alert -> Void in
+            let textField = prompt.textFields![0] as UITextField
+            textField.autocapitalizationType = .words
+            textField.spellCheckingType = .default
+            newAlbumName = textField.text ?? ""
+            
+            let photoImportVC = PhotoImportVC(coreDataFunctions: self.coreDataFunctions!, cloudKitOperations: self.cloudkitOperations!)
+
+            photoImportVC.newCollectionName = newAlbumName
+            photoImportVC.title = "\(newAlbumName)"
+            photoImportVC.photoUploadOperations(operation: .newCollection, uid: nil)
+            self.navigationController?.pushViewController(photoImportVC, animated: true)
+        })
+        prompt.addTextField { (textField : UITextField!) -> Void in
+            textField.placeholder = "Photo Album Name" }
+        prompt.addAction(getInput)
+        prompt.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler:nil))
+        self.present(prompt, animated: true, completion: nil)
+    }
+    
     
     
     //MARK: Development Functions

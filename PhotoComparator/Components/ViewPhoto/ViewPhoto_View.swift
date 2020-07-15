@@ -8,15 +8,27 @@
 
 import UIKit
 
+protocol PhotoComparisonProtocol {
+    var photoComparisonIndex: Int { get set }
+    var shouldComparePhotos: Bool { get set }
+}
+
 class ViewPhoto_View: UIView {
 
+    var delegate: PhotoComparisonProtocol!
     
     //MARK: Initilization
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = UIColor.black
         setupView()
-        
+    }
+    
+    init(frame: CGRect, delegate: PhotoCollectionVC) {
+        super.init(frame: frame)
+        self.backgroundColor = UIColor.black
+        self.delegate = delegate
+        setupView()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -29,6 +41,7 @@ class ViewPhoto_View: UIView {
         self.addSubview(exitButton)
         self.addSubview(indexLabel)
         self.addSubview(scrollView)
+        self.addSubview(cameraButton)
         scrollView.addSubview(imageView)
 
         exitButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
@@ -41,6 +54,11 @@ class ViewPhoto_View: UIView {
         indexLabel.widthAnchor.constraint(equalTo: self.widthAnchor, constant: 50).isActive = true
         indexLabel.heightAnchor.constraint(equalToConstant: 60).isActive = true
 
+        cameraButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        cameraButton.widthAnchor.constraint(equalToConstant: self.frame.width-50).isActive = true
+        cameraButton.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        cameraButton.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor, constant: -10).isActive = true
+        
         scrollView.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
         scrollView.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
         scrollView.topAnchor.constraint(equalTo: self.indexLabel.bottomAnchor, constant: 12).isActive = true
@@ -55,6 +73,7 @@ class ViewPhoto_View: UIView {
    
         self.bringSubviewToFront(indexLabel)
         self.bringSubviewToFront(exitButton)
+        self.bringSubviewToFront(cameraButton)
     }
     
     //MARK: View functionality
@@ -66,6 +85,7 @@ class ViewPhoto_View: UIView {
     
     func updateIndex(currentIndex: Int, total: Int){
         indexLabel.text = "(\(currentIndex+1)/\(total))"
+        delegate.photoComparisonIndex = currentIndex
     }
     
     //MARK: Component Setup
@@ -99,4 +119,22 @@ class ViewPhoto_View: UIView {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
+    
+    var cameraButton: UIButton = {
+        var button = UIButton()
+        button.setTitle("Take Progress Picture", for:   .normal)
+        button.layer.cornerRadius = 5
+        button.setTitleColor(UIColor.dynamicText(), for: .normal)
+        button.layer.backgroundColor = UIColor.primaryColor().cgColor
+        button.layer.borderColor = UIColor.secondaryColor().cgColor
+        button.layer.borderWidth = 1
+        button.layer.masksToBounds = true
+        button.addTarget(self, action: #selector(setComparisonPhotoDetails), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    @objc func setComparisonPhotoDetails(){
+        delegate.shouldComparePhotos = true
+    }
 }

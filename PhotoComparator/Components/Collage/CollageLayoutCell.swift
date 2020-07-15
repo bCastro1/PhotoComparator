@@ -22,6 +22,7 @@ class CollageLayoutCell: Cell {
         self.imageView.backgroundColor = UIColor.clear
         self.imageView.layer.cornerRadius = 8
         self.imageView.layer.masksToBounds = true
+        self.imageView.contentMode = .scaleAspectFill
     }
     
     override func reset() {

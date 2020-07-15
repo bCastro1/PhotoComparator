@@ -41,7 +41,7 @@ class CollectionListVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         collectionFolderTableView.delegate = self
         collectionFolderTableView.dataSource = self
         collectionFolderTableView.keyboardDismissMode = .onDrag
-        self.view.backgroundColor = UIColor.white
+        self.view.backgroundColor = UIColor.dynamicBackground()
         
         setupViews()
         navigationBarSetup()
@@ -76,7 +76,7 @@ class CollectionListVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             photoImportVC.title = self.newCollectionName
             photoImportVC.newCollectionName = self.newCollectionName
             photoImportVC.mergedPhotoToUpload = self.imageToSave
-            photoImportVC.photoUploadOperations(operation: .singlePhoto_New_CollectionAddition)
+            photoImportVC.photoUploadOperations(operation: .singlePhoto_New_CollectionAddition, uid: nil)
             self.navigationController?.pushViewController(photoImportVC, animated: true)
         })
         prompt.addTextField { (textField : UITextField!) -> Void in
@@ -146,9 +146,8 @@ class CollectionListVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         let photoImportVC = PhotoImportVC(coreDataFunctions: self.coreDataFunctions!, cloudKitOperations: self.cloudkitOperations!)
         
         let photoModel = photoArray[indexPath.row]
-        photoImportVC.UID = photoModel.nameUID as NSString
         photoImportVC.mergedPhotoToUpload = imageToSave
-        photoImportVC.photoUploadOperations(operation: .singlePhoto_Existing_CollectionAddition)
+        photoImportVC.photoUploadOperations(operation: .singlePhoto_Existing_CollectionAddition, uid: photoModel.nameUID as NSString)
         photoImportVC.newCollectionName = photoModel.name
         photoImportVC.title = "\(photoModel.name)"
         photoImportVC.shouldWaitToSetupCells = true
@@ -173,6 +172,7 @@ class CollectionListVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             filterTableWithSearch(text: searchText)
         }
     }
+    //fix nav bar once dismissed
     
     func filterTableWithSearch(text: String){
         photoArray = self.photoArray_SearchDuplicate.filter({ (collection) -> Bool in

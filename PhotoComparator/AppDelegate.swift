@@ -75,8 +75,5 @@ extension AppDelegate: UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
         CoreDataManager.sharedManager.saveContext()
     }
-
-
-
 }
 

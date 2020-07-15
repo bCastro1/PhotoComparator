@@ -10,13 +10,12 @@ import UIKit
 import GoogleMobileAds
 
 class Collage_Step2: UIViewController, Collage_Draw_Protocol, GADInterstitialDelegate {
-
     
-
     //MARK:Init
     var coreDataFunctions: CoreDataFunctions?
     var cloudkitOperations: CloudKitFunctions?
     var collage_Draw: Collage_Draw?
+    var tutorialView = Tutorial_View()
     
     //new collage start
     init(coreDataFunctions: CoreDataFunctions, cloudKitOperations: CloudKitFunctions, layoutModel: CollageLayoutModel){
@@ -28,8 +27,9 @@ class Collage_Step2: UIViewController, Collage_Draw_Protocol, GADInterstitialDel
         
         let layout = layoutModel.image //which image model chosen; eg. 2a -> is two horizontal photos side by side
         
-        self.collage_Draw = Collage_Draw(frameWidth: self.view.frame.width, frameHeight: self.view.frame.height, layout: layout)
+        self.collage_Draw = Collage_Draw(frameWidth: self.view.frame.width, frameHeight: self.view.frame.width, layout: layout)
     }
+
 
     //used when constructing a collage
     init(coreDataFunctions: CoreDataFunctions, cloudKitOperations: CloudKitFunctions, collage_Draw: Collage_Draw){
@@ -66,7 +66,7 @@ class Collage_Step2: UIViewController, Collage_Draw_Protocol, GADInterstitialDel
     var invisButton4 = CollageSection_SelectButton()
 
     enum CollageLayout: String {
-        case _2a = "2a"
+        case _2a = "2a" //photo names
         case _2b = "2b"
         case _3a = "3a"
         case _3b = "3b"
@@ -77,19 +77,7 @@ class Collage_Step2: UIViewController, Collage_Draw_Protocol, GADInterstitialDel
         case _4c = "4c"
         case _4d = "4d"
     }
-    
-    
-    //MARK: View did load
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        self.view.backgroundColor = .dynamicBackground()
-        setupCollageLayoutView()
-        self.interstitial = setupAndReturnAdvert()
-        interstitial.delegate = self
-        self.collage_Draw?.delegate = self
-    }
 
-    
     //MARK: Components
     var collageLayoutImageView: UIImageView = {
         var imageView = UIImageView()
@@ -102,11 +90,23 @@ class Collage_Step2: UIViewController, Collage_Draw_Protocol, GADInterstitialDel
         var imageview = UIImageView()
         imageview.backgroundColor = .white
         imageview.contentMode = .scaleToFill
-        imageview.alpha = 0.5
+        imageview.alpha = 0.8
         imageview.translatesAutoresizingMaskIntoConstraints = false
         return imageview
     }()
+}
 
+extension Collage_Step2 {
+    //MARK: View did load
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.view.backgroundColor = .dynamicBackground()
+        setupCollageLayoutView()
+        self.interstitial = setupAndReturnAdvert()
+        interstitial.delegate = self
+        self.collage_Draw?.delegate = self
+        tutorialViewSetup()
+    }
     
     //MARK: setup funcs
     func setupCollageLayoutView(){
@@ -180,9 +180,58 @@ class Collage_Step2: UIViewController, Collage_Draw_Protocol, GADInterstitialDel
         self.navigationController?.popToRootViewController(animated: true)
     }
     
+    
+    
+    //MARK: Tutorial View
+    func tutorialViewSetup(){
+        if (UserDefaults.standard.getTutorialDefault(tutorialType: .collage) == "show"){
+            tutorialView = Tutorial_View(frame: self.view.frame, tutorialTextID: .collageStart)
+            tutorialView.translatesAutoresizingMaskIntoConstraints = false
+            self.view.addSubview(tutorialView)
+            self.tutorialView.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
+            self.tutorialView.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
+            self.tutorialView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
+            self.tutorialView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+            
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissTutorialView))
+            self.tutorialView.addGestureRecognizer(tapGesture)
+            self.invisButton1.isEnabled = false
+            self.invisButton2.isEnabled = false
+            self.invisButton3.isEnabled = false
+            self.invisButton4.isEnabled = false
+            
+            self.invisButton1.alpha = 0.5
+            self.invisButton2.alpha = 0.5
+            self.invisButton3.alpha = 0.5
+            self.invisButton4.alpha = 0.5
+            
+            self.collageLayoutImageView.alpha = 0.6
+            self.view.bringSubviewToFront(tutorialView)
+        }
+    }
+    
+    @objc func dismissTutorialView(){
+        self.collageLayoutImageView.alpha = 1
+        self.invisButton1.isEnabled = true
+        self.invisButton2.isEnabled = true
+        self.invisButton3.isEnabled = true
+        self.invisButton4.isEnabled = true
+        
+        self.invisButton1.alpha = 1
+        self.invisButton2.alpha = 1
+        self.invisButton3.alpha = 1
+        self.invisButton4.alpha = 1
+        self.tutorialView.removeFromSuperview()
+    }
+    
 
     //MARK: collage layout button constraints
     func setLayoutImageAndButtonConstraints(layout: CollageLayout){
+        invisButton1.translatesAutoresizingMaskIntoConstraints = false
+        invisButton2.translatesAutoresizingMaskIntoConstraints = false
+        invisButton3.translatesAutoresizingMaskIntoConstraints = false
+        invisButton4.translatesAutoresizingMaskIntoConstraints = false
+        
         invisButton1.tag = 0
         invisButton2.tag = 1
         invisButton3.tag = 2

@@ -13,7 +13,7 @@ class UploadProgressView: UIView {
     //MARK: Initilization
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = UIColor.white
+        self.backgroundColor = .dynamicText()
         setupView()
     }
     
@@ -26,8 +26,9 @@ class UploadProgressView: UIView {
     
     //MARK: View setup
     func setupView(){
+        //height == 60
         self.progressView.progressViewStyle = .bar
-        self.translatesAutoresizingMaskIntoConstraints = true
+        self.translatesAutoresizingMaskIntoConstraints = false
         self.layer.masksToBounds = true
         self.layer.borderColor = UIColor.gray.cgColor
         self.layer.borderWidth = 1
@@ -43,7 +44,7 @@ class UploadProgressView: UIView {
         
         progressLabel.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 15).isActive = true
         progressLabel.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -15).isActive = true
-        progressLabel.bottomAnchor.constraint(equalTo: progressView.topAnchor, constant: 5).isActive = true
+        progressLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -20).isActive = true
         progressLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 5).isActive = true
     }
     
@@ -58,15 +59,26 @@ class UploadProgressView: UIView {
     var progressLabel: UILabel = {
         var label = UILabel()
         label.textAlignment = .center
+        label.numberOfLines = 0
+        label.layer.masksToBounds = true
+        label.textColor = .dynamicBackground()
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.5
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+
     
     //MARK: Progress functionality
     func progress(currentIdx: Int, total: Int){
-        progressLabel.text = "Saving \(currentIdx) of \(total)"
-        progressView.progress = Float(currentIdx) / Float(total)
-        
-        
+        if (currentIdx+1 == total){
+            //upload finished
+            progressLabel.text = "Finished saving \(total) photos"
+            progressView.progress = 0.99 / 1
+        }
+        else {
+            progressLabel.text = "Saving \(currentIdx) of \(total)"
+            progressView.progress = Float(currentIdx) / Float(total)
+        }
     }
 }

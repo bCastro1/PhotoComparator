@@ -29,6 +29,9 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
     var UID: NSString = ""
     var uploadButton = UIBarButtonItem()
     var progressView = UploadProgressView()
+    var tutorialView = Tutorial_View()
+    var controllersToPop: Int = 2
+
 
     var uploadOperationType = importOperationType.newCollection
     
@@ -67,12 +70,15 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
         case singlePhoto_New_CollectionAddition
     }
     
-    func photoUploadOperations(operation: importOperationType){
+    func photoUploadOperations(operation: importOperationType, uid: NSString?){
         uploadOperationType = operation
+        if let UID = uid {
+            self.UID = UID
+        } else { self.UID = UUID().uuidString as NSString}
+        
         switch operation {
         case .newCollection:
             //new, random uid
-            self.UID = UUID().uuidString as NSString
             newCollectionUpload(UID: self.UID)
             break
             
@@ -105,13 +111,20 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
         cloudkitOperations?.delegate = self
         self.collectionView.register(PhotoImportCell.self, forCellWithReuseIdentifier: "PhotoImportCell")
         self.setupProgressView()
+        tutorialViewSetup()
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        self.navigationItem.title = "Import"
         if (shouldWaitToSetupCells){
             self.setupCells()
         }
     }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        self.navigationController?.navigationBar.isHidden = false
+    }
+    
     
     func setupProgressView(){
         progressView.isHidden = true
@@ -119,7 +132,7 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
         progressView.progress(currentIdx: 1, total: 1)
         self.view.addSubview(progressView)
         progressView.translatesAutoresizingMaskIntoConstraints = false
-        progressView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 5).isActive = true
+        progressView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -5).isActive = true
         progressView.heightAnchor.constraint(equalToConstant: 60).isActive = true
         progressView.widthAnchor.constraint(equalTo: self.view.widthAnchor, constant: -50).isActive = true
         progressView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
@@ -154,7 +167,7 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
     
     //MARK: Getting collection name
     @objc func getNewCollectionNameFromUser(){
-        let prompt = UIAlertController(title: "New Collection", message: "Please input the name of your new photo collection", preferredStyle: .alert)
+        let prompt = UIAlertController(title: "New Album", message: "Please input the name of your new photo album", preferredStyle: .alert)
         
         let getInput = UIAlertAction(title: "Next", style: .default, handler: {
             alert -> Void in
@@ -162,13 +175,13 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
             textField.autocapitalizationType = .words
             textField.spellCheckingType = .default
             self.newCollectionName = textField.text ?? ""
-            self.title = self.newCollectionName
+            self.navigationItem.title = self.newCollectionName
             if (self.photoObjectArray.isEmpty){
                 self.promptSavedPhotosOrCamera()
             }
         })
         prompt.addTextField { (textField : UITextField!) -> Void in
-            textField.placeholder = "Photo Collection Name" }
+            textField.placeholder = "Photo Album Name" }
         prompt.addAction(getInput)
         prompt.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { handler in
                 self.importButtonDisplayPicker.isHidden = false
@@ -177,6 +190,33 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
         self.importButtonDisplayPicker.isHidden = true
     }
     
+    
+    //MARK: Tutorial View
+    func tutorialViewSetup(){
+        if (UserDefaults.standard.getTutorialDefault(tutorialType: .album) == "show"){
+
+            tutorialView = Tutorial_View(frame: self.view.frame, tutorialTextID: .addPhotoToAlbum)
+            tutorialView.translatesAutoresizingMaskIntoConstraints = false
+            self.view.addSubview(tutorialView)
+            self.tutorialView.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
+            self.tutorialView.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
+            self.tutorialView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
+            self.tutorialView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+            
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissTutorialView))
+            self.tutorialView.addGestureRecognizer(tapGesture)
+            
+            importButtonDisplayPicker.isEnabled = false
+            importButtonDisplayPicker.alpha = 0.6
+            self.view.bringSubviewToFront(tutorialView)
+        }
+    }
+    
+    @objc func dismissTutorialView(){
+        importButtonDisplayPicker.alpha = 1
+        importButtonDisplayPicker.isEnabled = true
+        self.tutorialView.removeFromSuperview()
+    }
 
 
     //MARK: setupCells
@@ -204,28 +244,52 @@ class PhotoImportVC: CollectionViewController, CoreDataSaveProtocol, UINavigatio
             print("progress: (\(progressInt+1)/\(self.progressTotal))")
             self.progressView.progress(currentIdx: progressInt, total: self.progressTotal)
             if (progressInt+1 == self.progressTotal){
-                if (self.mergedPhotoToUpload == nil){
-                    //self.navigationController?.popViewController(animated: true)
-                    
-                    self.photoObjectArray.removeAll()
-                    self.setupCells()
-                    self.importButtonDisplayPicker.isHidden = false
-                    self.progressView.isHidden = true
-                    self.newCollectionName = ""
-                    self.title = self.newCollectionName
-
-//                    BottomNavigationBar.sharedManager.selectedIndex = 0
-//                    BottomNavigationBar.sharedManager.modalPresentationStyle = .fullScreen
-//                    self.present(BottomNavigationBar.sharedManager, animated: false, completion: nil)
-                }
-                else {
-                    //self.navigationController?.popViewControllers(controllersToPop: 2, animated: true)
-                }
+                self.uploadFinishedPromptNextAction()
             }
-
         }
     }
     
+    func uploadFinishedPromptNextAction(){
+        let finishNotice = UIAlertController(title: "Saved!", message: "Your photo was successfully uploaded", preferredStyle: .alert)
+        
+        let uploadMoreAction = UIAlertAction(title: "Upload more photos", style: .default, handler: { alert -> Void in
+            self.resetUI()
+        })
+        
+        let backToCollageAction = UIAlertAction(title: "Exit", style: .default, handler: { alert -> Void in
+            self.navigationController?.popViewControllers(controllersToPop: self.controllersToPop, animated: true)
+        })
+        
+        let backToAlbumsAction = UIAlertAction(title: "Go to albums page", style: .default, handler: { alert -> Void in
+            self.navigationController?.popToRootViewController(animated: true)
+            self.resetUI()
+        })
+
+        if (mergedPhotoToUpload == nil){
+            //if merged photo is nil, that means they are uploading from main tab bar option
+            finishNotice.addAction(uploadMoreAction)
+            finishNotice.addAction(backToAlbumsAction)
+        }
+        else {
+            //if not nil, user is uploading from the collage page
+            finishNotice.addAction(backToCollageAction)
+        }
+        
+        self.present(finishNotice, animated: true, completion: nil)
+    }
+    
+    deinit {
+        print("photo upload screen de init")
+    }
+    
+    func resetUI(){
+        self.photoObjectArray.removeAll()
+        self.setupCells()
+        self.importButtonDisplayPicker.isHidden = false
+        self.progressView.isHidden = true
+        self.newCollectionName = ""
+        self.navigationItem.title = self.newCollectionName
+    }
 }
 
 

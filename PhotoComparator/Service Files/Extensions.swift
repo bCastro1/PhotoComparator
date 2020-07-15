@@ -15,7 +15,6 @@ extension UIColor {
     
     private static let primaryThemeColor = UIColor(red: 255/255, green: 191/255, blue: 136/255, alpha: 1) //orange peachy
     private static let secondaryThemeColor = UIColor(red: 4/255, green: 57/255, blue: 60/255, alpha: 1) //dark blue
-//    static let highlightColor = UIColor(red: 190/255, green: 0/255, blue: 0/255, alpha: 1)
     //color blind?
     
     static func primaryColor() -> UIColor {
@@ -95,7 +94,7 @@ extension UIColor {
 }
 
 
-// MARK: Helper Function
+// MARK: Alert Helper Function
 func showSimpleAlertWithTitle(_ title: String!, message: String, viewController: UIViewController) {
     let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
     let action = UIAlertAction(title: "OK", style: .cancel, handler: nil)
@@ -114,6 +113,20 @@ extension NSDate {
         let yourDate = formatter.date(from: myString)
         //set date format to model string
         formatter.dateFormat = "dd-MMM-yyyy"
+        let stringDate = formatter.string(from: yourDate!)
+
+        return stringDate
+    }
+    
+    func formatDate_DayMonth() -> String{
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+
+        let myString = formatter.string(from: self as Date)
+        // convert your model NSString to string date
+        let yourDate = formatter.date(from: myString)
+        //set date format to model string
+        formatter.dateFormat = "dd-MMM"
         let stringDate = formatter.string(from: yourDate!)
 
         return stringDate
@@ -216,6 +229,14 @@ extension UIImageView {
 //MARK: UserDefaults
 let kSelectedStorageType = "UserSelectedStorageType"
 
+enum tutorialDefaults {
+    case album
+    case collage
+}
+
+let kAlbumTutorialDefault = "AlbumTutorialDefault"
+let kCollageTutorialDefault = "CollageTutorialDefault"
+
 extension UserDefaults{
     //default user selected storage type
     //MARK: Check Login
@@ -226,6 +247,24 @@ extension UserDefaults{
     //MARK: Retrieve storage type
     func getDefaultStorageType() -> String{
         return string(forKey: kSelectedStorageType) ?? "Local"
+    }
+    
+    func setTutorialDefault(value: String, tutorialType: tutorialDefaults){
+        switch tutorialType {
+        case .album:
+            set(value, forKey: kAlbumTutorialDefault)
+        case .collage:
+            set(value, forKey: kCollageTutorialDefault)
+        }
+    }
+    
+    func getTutorialDefault(tutorialType: tutorialDefaults) -> String {
+        switch tutorialType {
+        case .album:
+            return string(forKey: kAlbumTutorialDefault) ?? "show"
+        case .collage:
+            return string(forKey: kCollageTutorialDefault) ?? "show"
+        }
     }
 }
 
