@@ -4,7 +4,7 @@
 //
 //  Created by Tibor Bödecs on 2019. 04. 25..
 //
-
+#if canImport(UIKit)
 import Foundation
 import UIKit
 
@@ -42,6 +42,9 @@ extension Array {
 extension CGFloat {
     
     var evenRounded: CGFloat {
+        guard self > 1 else {
+            return self
+        }
         var newValue = self.rounded(.towardZero)
         if newValue.truncatingRemainder(dividingBy: 2) == 1 {
             newValue -= 1
@@ -110,3 +113,4 @@ extension UICollectionViewCell {
         return collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: self.uniqueIdentifier, for: indexPath)
     }
 }
+#endif

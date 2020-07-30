@@ -63,17 +63,28 @@ For more example you can clone this repo and look at the example app.
 Add the following line to your Podfile:
 
 ```
-pod "BSImagePicker", "~> 3.0"
+pod "BSImagePicker", "~> 3.1"
 ```
 ### Carthage
 Add the following line to your Cartfile:
 ```
-github "mikaoj/BSImagePicker" ~> 3.0
+github "mikaoj/BSImagePicker" ~> 3.1
 ```
+### Swift Package Manager
+Add it to the dependencies value of your Package.swift.:
+```
+dependencies: [
+.package(url: "https://github.com/mikaoj/BSImagePicker.git", from: "version-tag")
+]
+```
+
+## Xamarin
+
+If you are Xamarin developer you can use [Net.Xamarin.iOS.BSImagePicker](https://github.com/SByteDev/Net.Xamarin.iOS.BSImagePicker)
 
 ## Contribution
 
-This project does not come with GitHub Issues-based support, and users are instead encouraged to become active participants in its continued development — by fixing any bugs that they encounter, or by improving the documentation wherever it’s found to be lacking.
+Users are encouraged to become active participants in its continued development — by fixing any bugs that they encounter, or by improving the documentation wherever it’s found to be lacking.
 
 If you wish to make a change, [open a Pull Request](https://github.com/mikaoj/BSImagePicker/pull/new) — even if it just contains a draft of the changes you’re planning, or a test that reproduces an issue — and we can discuss it further from there.
 

@@ -18,7 +18,7 @@ class MainScreenCell: Cell {
         super.awakeFromNib()
         
         self.textLabel.textColor = .dynamicText()
-        self.imageView.backgroundColor = UIColor.gray
+        self.imageView.backgroundColor = .dynamicBackground()
         self.imageView.layer.cornerRadius = 8
         self.imageView.layer.masksToBounds = true
         

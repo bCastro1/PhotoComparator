@@ -80,6 +80,10 @@ class PhotoCollectionVC: CollectionViewController, PhotoComparisonProtocol {
         albumDataFetch()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        self.collectionView.collectionViewLayout.invalidateLayout()
+    }
+    
     //MARK: Cell Setup
     
     func setupCells(mode: vcMode){
@@ -113,6 +117,8 @@ class PhotoCollectionVC: CollectionViewController, PhotoComparisonProtocol {
                         break
                     case .delete:
                         //MARK: Delete
+                        //viewModel.view?.trashButton.isHidden.toggle()
+
                         let deletionNotice = UIAlertController(title: "Delete Photo", message: "Are you sure you want to delete this photo? This cannot be undone.", preferredStyle: .alert)
                         let deleteAction = UIAlertAction(title: "Delete", style: .destructive, handler: {
                             alert -> Void in
@@ -125,7 +131,8 @@ class PhotoCollectionVC: CollectionViewController, PhotoComparisonProtocol {
                                     self?.cancelPhotoDeletion()
                                     }
                                 else {
-                                    print("cant delete folder picture CK")
+                                    self?.cancelPhotoDeletion()
+                                    showSimpleAlertWithTitle("Error", message: "Cannot delete the folder picture.", viewController: self!)
                                 }
                             }
                             else {
@@ -136,12 +143,13 @@ class PhotoCollectionVC: CollectionViewController, PhotoComparisonProtocol {
                                     self?.cancelPhotoDeletion()
                                 }
                                 else {
-                                    print("cant delete folder picture CD")
+                                    self?.cancelPhotoDeletion()
+                                    showSimpleAlertWithTitle("Error", message: "Cannot delete the folder picture.", viewController: self!)
                                 }
                             }
                             self?.albumDataFetch()
                         })
-                        
+
                         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
                         deletionNotice.addAction(deleteAction)
                         deletionNotice.addAction(cancelAction)
@@ -163,7 +171,7 @@ class PhotoCollectionVC: CollectionViewController, PhotoComparisonProtocol {
                     }
             }
         }
-        let grid = Grid(columns: 1, margin: UIEdgeInsets(horizontal: 0, vertical: 35), padding: .zero)
+        let grid = Grid(columns: 4, margin: UIEdgeInsets(horizontal: 0, vertical: 35), padding: .zero)
         let photoSection = Section(grid: grid, header: header, items: items)
         self.collectionView.source = .init(grid: grid, sections: [photoSection])
         self.collectionView.reloadData()

@@ -21,7 +21,7 @@ class PhotoCollectionCell: Cell {
 
         self.dateLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         self.dateLabel.textColor = .dynamicText()
-        self.imageView.backgroundColor = UIColor.gray
+        self.imageView.backgroundColor = .dynamicBackground()
         self.imageView.layer.cornerRadius = 5
         self.imageView.layer.masksToBounds = true
         self.imageView.contentMode = .scaleAspectFill

@@ -17,9 +17,9 @@ class PhotoImportCell: Cell {
         super.awakeFromNib()
         
         self.dateLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        self.dateLabel.textColor = .black
+        self.dateLabel.textColor = .dynamicText()
         
-        self.imageView.backgroundColor = UIColor.white
+        self.imageView.backgroundColor = .dynamicBackground()
         self.imageView.layer.cornerRadius = 5
         self.imageView.layer.masksToBounds = true
         self.imageView.contentMode = .scaleAspectFit

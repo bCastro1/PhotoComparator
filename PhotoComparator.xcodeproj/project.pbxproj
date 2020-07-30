@@ -86,6 +86,7 @@
 		D6D51385235A552F00F90274 /* CollectionFolderModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D51384235A552F00F90274 /* CollectionFolderModel.swift */; };
 		D6DC03ED236CF33800D444EC /* TextMessageComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6DC03EC236CF33800D444EC /* TextMessageComposer.swift */; };
 		D6EC7D2D2352D0F400E70CF6 /* CloudKitFunctions_PrivateDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6EC7D2C2352D0F400E70CF6 /* CloudKitFunctions_PrivateDB.swift */; };
+		D6FEE58124C11488005F99FF /* TransparencySliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6FEE58024C11488005F99FF /* TransparencySliderView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -196,6 +197,7 @@
 		D6D51384235A552F00F90274 /* CollectionFolderModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionFolderModel.swift; sourceTree = "<group>"; };
 		D6DC03EC236CF33800D444EC /* TextMessageComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextMessageComposer.swift; sourceTree = "<group>"; };
 		D6EC7D2C2352D0F400E70CF6 /* CloudKitFunctions_PrivateDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitFunctions_PrivateDB.swift; sourceTree = "<group>"; };
+		D6FEE58024C11488005F99FF /* TransparencySliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransparencySliderView.swift; sourceTree = "<group>"; };
 		D7013F598238D1C79E168AD8 /* Pods-PhotoComparator.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PhotoComparator.release.xcconfig"; path = "Target Support Files/Pods-PhotoComparator/Pods-PhotoComparator.release.xcconfig"; sourceTree = "<group>"; };
 		D79989F3FB614EDAB76C1494 /* Pods-PhotoComparatorTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PhotoComparatorTests.debug.xcconfig"; path = "Target Support Files/Pods-PhotoComparatorTests/Pods-PhotoComparatorTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -442,6 +444,7 @@
 		D69F5B7523345D86001FDBC6 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				D6FEE57D24C1132D005F99FF /* Camera */,
 				D6B9044C23E4EDB700B2215C /* Collage */,
 				D6042735234BF10B0087A76B /* ViewPhoto */,
 				D6C7569D233F192F003D1931 /* Header */,
@@ -541,6 +544,14 @@
 				D6D51382235A3D1400F90274 /* CloudKitError.swift */,
 			);
 			path = CloudKitOperations;
+			sourceTree = "<group>";
+		};
+		D6FEE57D24C1132D005F99FF /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				D6FEE58024C11488005F99FF /* TransparencySliderView.swift */,
+			);
+			path = Camera;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -808,6 +819,7 @@
 				D61B4FEC2336B58300B284E2 /* MainScreenCell.swift in Sources */,
 				D693928524B3D42600F1D9E2 /* Tutorial View.swift in Sources */,
 				D6988CB5233990C3006A7F8A /* PhotoImportCell.swift in Sources */,
+				D6FEE58124C11488005F99FF /* TransparencySliderView.swift in Sources */,
 				D660F5C823E8EB9A00C48D15 /* Collage_Step4.swift in Sources */,
 				D6042739234BF1E90087A76B /* ViewPhoto_View.swift in Sources */,
 				D65525B0234820B2002F70F2 /* CoreDataFunctions.swift in Sources */,
@@ -999,7 +1011,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.01;
+				MARKETING_VERSION = 1.02;
 				PRODUCT_BUNDLE_IDENTIFIER = com.victoryCloud.PhotoComparator;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -1020,7 +1032,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.01;
+				MARKETING_VERSION = 1.02;
 				PRODUCT_BUNDLE_IDENTIFIER = com.victoryCloud.PhotoComparator;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

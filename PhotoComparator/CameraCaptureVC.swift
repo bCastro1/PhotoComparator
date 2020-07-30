@@ -11,7 +11,7 @@ import AVFoundation
 import Photos
 
 class CameraCaptureVC: UIViewController {
-
+    
     var pho: AVCaptureOutput?
     var coreDataFunctions: CoreDataFunctions?
     var cloudkitOperations: CloudKitFunctions?
@@ -22,6 +22,9 @@ class CameraCaptureVC: UIViewController {
     var passedAlbumUID: NSString?
     var passedAlbumName: String?
     
+    var transparencySlider = TransparencySliderView()
+    var sliderValue: CGFloat = 0.5 //protocol value from TransparencySliderView
+
     init(coreDataFunctions: CoreDataFunctions, cloudKitOperations: CloudKitFunctions){
         super.init(nibName: nil, bundle: nil)
         self.coreDataFunctions = coreDataFunctions
@@ -56,14 +59,15 @@ class CameraCaptureVC: UIViewController {
     var imageDisplayView: UIImageView = {
         var iv = UIImageView()
         iv.isHidden = true
+        iv.contentMode = .scaleAspectFit
         iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
     }()
     
-    var transparentImageView: UIImageView = {
+    lazy var transparentImageView: UIImageView = {
         var iv = UIImageView()
         iv.isHidden = true
-        iv.alpha = 0.5
+        iv.alpha = CGFloat(self.sliderValue)
         iv.contentMode = .scaleAspectFit
         iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
@@ -71,7 +75,7 @@ class CameraCaptureVC: UIViewController {
     
     lazy var flashButton: UIButton = {
         var button = UIButton(type: .system)
-        button.setImage(UIImage.imageWithIonicon(.FlashOff, color: UIColor.white, iconSize: 40, imageSize: CGSize(width: 40, height: 40)), for: .normal)
+        button.setImage(UIImage.imageWithIonicon(.FlashOff, color: .dynamicText(), iconSize: 40, imageSize: CGSize(width: 40, height: 40)), for: .normal)
         button.addTarget(self, action: #selector(flashButtonPressed), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -79,7 +83,7 @@ class CameraCaptureVC: UIViewController {
     
     lazy var captureButton: UIButton = {
         var button = UIButton(type: .system)
-        button.setImage(UIImage.imageWithIonicon(.AndroidRadioButtonOn, color: UIColor.white, iconSize: 100, imageSize: CGSize(width: 100, height: 100)), for: .normal)
+        button.setImage(UIImage.imageWithIonicon(.AndroidRadioButtonOn, color: .dynamicText(), iconSize: 100, imageSize: CGSize(width: 100, height: 100)), for: .normal)
         button.addTarget(self, action: #selector(captureButtonPressed), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -87,7 +91,7 @@ class CameraCaptureVC: UIViewController {
     
     lazy var flipCameraButton: UIButton = {
         var button = UIButton(type: .system)
-        button.setImage(UIImage.imageWithIonicon(.iOSReverseCameraOutline, color: UIColor.white, iconSize: 50, imageSize: CGSize(width: 50, height: 50)), for: .normal)
+        button.setImage(UIImage.imageWithIonicon(.iOSReverseCameraOutline, color: .dynamicText(), iconSize: 50, imageSize: CGSize(width: 50, height: 50)), for: .normal)
         button.addTarget(self, action: #selector(flipCameraButtonPressed), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -95,7 +99,7 @@ class CameraCaptureVC: UIViewController {
     
     lazy var transparencyButton: UIButton = {
         var button = UIButton(type: .system)
-        button.setImage(UIImage.imageWithIonicon(.Images, color: UIColor.white, iconSize: 50, imageSize: CGSize(width: 50, height: 50)), for: .normal)
+        button.setImage(UIImage.imageWithIonicon(.Images, color: .dynamicText(), iconSize: 50, imageSize: CGSize(width: 50, height: 50)), for: .normal)
         button.addTarget(self, action: #selector(transparencyButtonPressed), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -103,7 +107,7 @@ class CameraCaptureVC: UIViewController {
     
     lazy var exitButton: UIButton = {
         var button = UIButton(type: .system)
-        button.setImage(UIImage.imageWithIonicon(.iOSClose, color: UIColor.white, iconSize: 40, imageSize: CGSize(width: 40, height: 40)), for: .normal)
+        button.setImage(UIImage.imageWithIonicon(.iOSClose, color: .dynamicText(), iconSize: 40, imageSize: CGSize(width: 40, height: 40)), for: .normal)
         button.addTarget(self, action: #selector(dismissVC), for: .touchUpInside)
         button.isHidden = false
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -112,7 +116,7 @@ class CameraCaptureVC: UIViewController {
     
     lazy var retakePhotoButton: UIButton = {
         var button = UIButton(type: .system)
-        button.setImage(UIImage.imageWithIonicon(.iOSUndo, color: UIColor.white, iconSize: 40, imageSize: CGSize(width: 40, height: 40)), for: .normal)
+        button.setImage(UIImage.imageWithIonicon(.iOSUndo, color: .dynamicText(), iconSize: 40, imageSize: CGSize(width: 40, height: 40)), for: .normal)
         button.addTarget(self, action: #selector(retakePhotoAction), for: .touchUpInside)
         button.isHidden = true
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -121,12 +125,14 @@ class CameraCaptureVC: UIViewController {
     
     lazy var savePhotoButton: UIButton = {
         var button = UIButton(type: .system)
-        button.setImage(UIImage.imageWithIonicon(.iOSDownloadOutline, color: UIColor.white, iconSize: 40, imageSize: CGSize(width: 40, height: 40)), for: .normal)
+        button.setImage(UIImage.imageWithIonicon(.iOSDownloadOutline, color: .dynamicText(), iconSize: 40, imageSize: CGSize(width: 40, height: 40)), for: .normal)
         button.addTarget(self, action: #selector(savePhotoButtonPressed), for: .touchUpInside)
         button.isHidden = true
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
+    
+    var tutorialView = Tutorial_View()
 }
 
 extension CameraCaptureVC {
@@ -134,16 +140,17 @@ extension CameraCaptureVC {
     
 
     
-            //MARK: View did load
+    //MARK: View did load
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .dynamicBackground()
         self.tabBarController?.navigationController?.isNavigationBarHidden = true
         self.navigationController?.navigationBar.isHidden = true
-        
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+
+        transparencySlider.slider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: .valueChanged)
         setupLayout()
-        
-        
+
         func configureCameraController(){
             cameraController.prepare {(error) in
                    if let error = error {
@@ -154,6 +161,11 @@ extension CameraCaptureVC {
                }
         }
         configureCameraController()
+    }
+    
+    @objc func sliderValueChanged(_ slider: UISlider){
+        self.sliderValue = CGFloat(slider.value)
+        self.transparentImageView.alpha = self.sliderValue
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -188,6 +200,7 @@ extension CameraCaptureVC {
             self.imageDisplayView.image = image
             self.shouldViewPhoto = true
             self.togglePhotoViewMode()
+            self.tutorialViewSetup()
 //            try? PHPhotoLibrary.shared().performChangesAndWait {
 //                PHAssetChangeRequest.creationRequestForAsset(from: image)
 //
@@ -195,13 +208,16 @@ extension CameraCaptureVC {
         }
     }
 
+    
     //MARK: Transparency
     @objc func transparencyButtonPressed(){
         showComparisonPhoto.toggle()
         if(showComparisonPhoto){
+            transparencySlider.isHidden = false
             transparentImageView.isHidden = false
         }
         else {
+            transparencySlider.isHidden = true
             transparentImageView.isHidden = true
         }
     }
@@ -235,11 +251,13 @@ extension CameraCaptureVC {
         let saveToCameraRoll = UIAlertAction(title: "Save to Camera Roll", style: .default) { handler in
             try? PHPhotoLibrary.shared().performChangesAndWait {
                 PHAssetChangeRequest.creationRequestForAsset(from: self.imageDisplayView.image!)
+                showSimpleAlertWithTitle("Saved", message: "Successfully saved to your Photos", viewController: self)
             }
         }
         let saveToAlbums = UIAlertAction(title: "Save to an Album", style: .default) { handler in
             let collectionSelectorVC = CollectionListVC(coreDataFunctions: self.coreDataFunctions!, cloudKitOperations: self.cloudkitOperations!)
-            collectionSelectorVC.imageToSave = self.imageDisplayView.image
+            let fixedRotatedImg = self.imageDisplayView.image?.rotate(radians: .pi*2)
+            collectionSelectorVC.imageToSave = fixedRotatedImg
             self.navigationController?.pushViewController(collectionSelectorVC, animated: true)
         }
         
@@ -247,8 +265,8 @@ extension CameraCaptureVC {
         if let uid = passedAlbumUID, let name = passedAlbumName {
             let saveToPassedAlbum = UIAlertAction(title: "Save to \(name)", style: .default) { handler in
                 let photoImportVC = PhotoImportVC(coreDataFunctions: self.coreDataFunctions!, cloudKitOperations: self.cloudkitOperations!)
-                  
-                photoImportVC.mergedPhotoToUpload = self.imageDisplayView.image
+                let fixedRotatedImg = self.imageDisplayView.image?.rotate(radians: .pi*2) //flipped 360 degrees because without this, core data saves it rotated by 180 degrees
+                photoImportVC.mergedPhotoToUpload = fixedRotatedImg
                 photoImportVC.photoUploadOperations(operation: .singlePhoto_Existing_CollectionAddition, uid: uid)
                 photoImportVC.newCollectionName = name
                 photoImportVC.title = "\(name)"
@@ -267,6 +285,36 @@ extension CameraCaptureVC {
         
         self.present(notice, animated: true, completion: nil)
     }
+
+    
+    //MARK: Tutorial View
+    func tutorialViewSetup(){
+        if (UserDefaults.standard.getTutorialDefault(tutorialType: .camera) == "show"){
+            //if show tutorial is true
+            tutorialView = Tutorial_View(frame: self.view.frame, tutorialTextID: .cameraFollowUp)
+            tutorialView.translatesAutoresizingMaskIntoConstraints = false
+            self.view.addSubview(tutorialView)
+            self.tutorialView.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
+            self.tutorialView.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
+            self.tutorialView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
+            self.tutorialView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+            self.view.bringSubviewToFront(tutorialView)
+            
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissTutorialView))
+            self.tutorialView.addGestureRecognizer(tapGesture)
+            
+            self.retakePhotoButton.isEnabled = false
+            self.savePhotoButton.isEnabled = false
+        }
+    }
+    
+    @objc func dismissTutorialView(){
+        self.retakePhotoButton.isEnabled = true
+        self.savePhotoButton.isEnabled = true
+        UserDefaults.standard.setTutorialDefault(value: "hide", tutorialType: .camera)
+        self.tutorialView.removeFromSuperview()
+    }
+    
     
     //MARK: Reset UIs
     @objc func retakePhotoAction(){
@@ -279,6 +327,8 @@ extension CameraCaptureVC {
         self.navigationController?.navigationBar.isHidden = false
     }
     
+
+    
     //MARK: toggle view photo
     func togglePhotoViewMode(){
         if (shouldViewPhoto){
@@ -289,9 +339,7 @@ extension CameraCaptureVC {
             self.captureButton.isHidden = true
             self.flashButton.isHidden = true
             self.flipCameraButton.isHidden = true
-            self.transparencyButton.isHidden = true
             
-            self.transparencyButton.isEnabled = false
             self.flipCameraButton.isEnabled = false
             self.flashButton.isEnabled = false
             self.captureButton.isEnabled = false
@@ -301,6 +349,11 @@ extension CameraCaptureVC {
             self.retakePhotoButton.isEnabled = true
             self.savePhotoButton.isHidden = false
             self.savePhotoButton.isEnabled = true
+            
+            if(self.transparentImageView.image != nil){
+                self.transparencyButton.isEnabled = false
+                self.transparencyButton.isHidden = true
+            }
         }
         else {
             self.imageDisplayView.isHidden = true
@@ -310,9 +363,7 @@ extension CameraCaptureVC {
             self.captureButton.isHidden = false
             self.flashButton.isHidden = false
             self.flipCameraButton.isHidden = false
-            self.transparencyButton.isHidden = false
             
-            self.transparencyButton.isEnabled = true
             self.flipCameraButton.isEnabled = true
             self.flashButton.isEnabled = true
             self.captureButton.isEnabled = true
@@ -322,6 +373,11 @@ extension CameraCaptureVC {
             self.retakePhotoButton.isEnabled = false
             self.savePhotoButton.isHidden = true
             self.savePhotoButton.isEnabled = false
+            
+            if(self.transparentImageView.image != nil){
+                self.transparencyButton.isEnabled = true
+                self.transparencyButton.isHidden = false
+            }
         }
     }
     
@@ -329,10 +385,31 @@ extension CameraCaptureVC {
     func setupLayout(){
         
         self.view.addSubview(preview)
-        preview.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
         preview.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        preview.heightAnchor.constraint(equalToConstant: self.view.frame.height).isActive = true
         preview.widthAnchor.constraint(equalToConstant: self.view.frame.width).isActive = true
+        preview.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
+        preview.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+        
+//        preview.topAnchor.constraint(equalTo: self.flashButton.bottomAnchor, constant: 5).isActive = true
+//        preview.bottomAnchor.constraint(equalTo: self.captureButton.topAnchor, constant: -5).isActive = true
+
+        self.view.addSubview(imageDisplayView)
+        imageDisplayView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        imageDisplayView.widthAnchor.constraint(equalToConstant: self.view.frame.width).isActive = true
+        imageDisplayView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
+        imageDisplayView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+        
+//        imageDisplayView.topAnchor.constraint(equalTo: self.flashButton.bottomAnchor, constant: 5).isActive = true
+//        imageDisplayView.bottomAnchor.constraint(equalTo: self.captureButton.topAnchor, constant: -5).isActive = true
+        
+        self.preview.addSubview(transparentImageView)
+        transparentImageView.centerXAnchor.constraint(equalTo: preview.centerXAnchor).isActive = true
+        transparentImageView.widthAnchor.constraint(equalToConstant: self.view.frame.width).isActive = true
+        transparentImageView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
+        transparentImageView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+        
+//        transparentImageView.topAnchor.constraint(equalTo: self.flashButton.bottomAnchor, constant: 5).isActive = true
+//        transparentImageView.bottomAnchor.constraint(equalTo: self.captureButton.topAnchor, constant: -5).isActive = true
         
         self.view.addSubview(flashButton)
         flashButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
@@ -346,15 +423,9 @@ extension CameraCaptureVC {
         exitButton.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 10).isActive = true
         exitButton.leftAnchor.constraint(equalTo: self.view.leftAnchor, constant: 10).isActive = true
         
-        self.preview.addSubview(transparentImageView)
-        transparentImageView.centerYAnchor.constraint(equalTo: preview.centerYAnchor).isActive = true
-        transparentImageView.centerXAnchor.constraint(equalTo: preview.centerXAnchor).isActive = true
-        transparentImageView.heightAnchor.constraint(equalToConstant: self.view.frame.height).isActive = true
-        transparentImageView.widthAnchor.constraint(equalToConstant: self.view.frame.width).isActive = true
-        
         self.view.addSubview(captureButton)
         captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        captureButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -20).isActive = true
+        captureButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -5).isActive = true
         captureButton.heightAnchor.constraint(equalToConstant: 100).isActive = true
         captureButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
         
@@ -365,11 +436,7 @@ extension CameraCaptureVC {
         retakePhotoButton.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 10).isActive = true
         retakePhotoButton.leftAnchor.constraint(equalTo: self.view.leftAnchor, constant: 10).isActive = true
         
-        self.view.addSubview(imageDisplayView)
-        imageDisplayView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
-        imageDisplayView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        imageDisplayView.heightAnchor.constraint(equalToConstant: self.view.frame.height).isActive = true
-        imageDisplayView.widthAnchor.constraint(equalToConstant: self.view.frame.width).isActive = true
+
         
         self.view.addSubview(transparencyButton)
         transparencyButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
@@ -377,6 +444,13 @@ extension CameraCaptureVC {
         transparencyButton.leftAnchor.constraint(equalTo: self.view.leftAnchor, constant: 10).isActive = true
         transparencyButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -10).isActive = true
         
+        self.view.addSubview(transparencySlider)
+        transparencySlider.translatesAutoresizingMaskIntoConstraints = false
+        transparencySlider.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+        transparencySlider.heightAnchor.constraint(equalToConstant: 80).isActive = true
+        transparencySlider.bottomAnchor.constraint(equalTo: self.captureButton.topAnchor, constant: -10).isActive = true
+        transparencySlider.widthAnchor.constraint(equalToConstant: self.view.frame.width - 10).isActive = true
+        transparencySlider.isHidden = true
         
         self.view.addSubview(flipCameraButton)
         flipCameraButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
@@ -393,6 +467,7 @@ extension CameraCaptureVC {
         
 
         
+        self.view.bringSubviewToFront(self.transparencySlider)
         self.view.bringSubviewToFront(self.imageDisplayView)
         self.view.bringSubviewToFront(self.retakePhotoButton)
         self.view.bringSubviewToFront(self.savePhotoButton)

@@ -16,6 +16,8 @@ class PhotoCollectionViewModel: ViewModel<PhotoCollectionCell,PhotoCollectionObj
         self.view?.imageView.image = self.model.photo
         self.view?.trashButton.isHidden = true
         self.view?.blurView.isHidden = self.model.hideBlurView
+        
+        self.view?.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(longPress)))
     }
     
     override func size(grid: Grid) -> CGSize {
@@ -31,13 +33,10 @@ class PhotoCollectionViewModel: ViewModel<PhotoCollectionCell,PhotoCollectionObj
 
         return grid.size(for: self.collectionView, ratio: 1.2, items: grid.columns / 2, gaps: grid.columns - 1)
     }
-    
-    func blurImageView(){
-        self.view?.blurView.isHidden = true
-    }
-    
-    func unBlurImageView(){
-        self.view?.blurView.isHidden = false
+
+    @objc func longPress(){
+        print("long hold")
+        self.view?.trashButton.isHidden.toggle()
     }
     
     

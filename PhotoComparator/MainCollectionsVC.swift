@@ -70,6 +70,7 @@ class MainCollectionsVC: CollectionViewController, DropDownProtocol {
     }
     override func viewWillDisappear(_ animated: Bool) {
         self.tutorialView.removeFromSuperview()
+        self.collectionView.collectionViewLayout.invalidateLayout()
     }
     
     var tutorialView = Tutorial_View()

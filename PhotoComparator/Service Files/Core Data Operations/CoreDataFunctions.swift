@@ -58,12 +58,7 @@ class CoreDataFunctions {
     //MARK: preparing image for CD
     private func prepareImageForCoreData(picture: PicturedObject, pictureID: String ,nameUID: String, idx: Int){
         conversion_Queue.async {
-            guard let fullResImageData = picture.photo.jpegData(compressionQuality: 1)
-                else {
-                    print("jpeg conversion err")
-                    return
-            }
-            
+            guard let fullResImageData = picture.photo.pngData() else {return}
             self.savePicturedObject(pictureID: pictureID, nameUID: nameUID, imageData: fullResImageData, date: picture.date as Date, idx: idx)
         }
     }

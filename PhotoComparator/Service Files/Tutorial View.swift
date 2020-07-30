@@ -31,6 +31,7 @@ class Tutorial_View: UIView {
         case addPhotoToAlbum //import screen first time
         case collageStart
         case collageCrop
+        case cameraFollowUp
     }
     
     //MARK: UI Components
@@ -72,8 +73,25 @@ class Tutorial_View: UIView {
         return tv
     }()
     
-    private var arrowLabel: UILabel = {
+    private var dynamicinfoTextView2: UITextView = {
+        var tv = UITextView()
+        tv.textAlignment = .center
+        tv.textColor = .dynamicBackground()
+        tv.font = UIFont.systemFont(ofSize: 22)
+        tv.backgroundColor = .clear
+        tv.isEditable = false
+        tv.translatesAutoresizingMaskIntoConstraints = false
+        return tv
+    }()
+    
+    private var arrowLabel_UP: UILabel = {
         var label = UILabel.labelWithIonicon(.ArrowUpA, color: .red, iconSize: 55)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private var arrowLabel_DOWN: UILabel = {
+        var label = UILabel.labelWithIonicon(.ArrowDownA, color: .red, iconSize: 55)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -91,10 +109,10 @@ extension Tutorial_View {
         
         switch tutorialSelected {
         case .addAlbum:
-            setupAndAnimateArrow()
+            setupAndAnimateArrow(tutorialSelected: .addAlbum)
             
             dynamicinfoTextView.text = "Tap here to add an album."
-            dynamicinfoTextView.topAnchor.constraint(equalTo: self.arrowLabel.bottomAnchor, constant: 10).isActive = true
+            dynamicinfoTextView.topAnchor.constraint(equalTo: self.arrowLabel_UP.bottomAnchor, constant: 10).isActive = true
             dynamicinfoTextView.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -15).isActive = true
             break
         case .addPhotoToAlbum:
@@ -113,6 +131,20 @@ extension Tutorial_View {
             dynamicinfoTextView.text = "Crop the photo to fit the space of the collage. This will not affect the original photo"
             dynamicinfoTextView.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 10).isActive = true
             dynamicinfoTextView.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+            break
+            
+        case .cameraFollowUp:
+            setupAndAnimateArrow(tutorialSelected: .cameraFollowUp)
+            dynamicinfoTextView.text = "Exit or retake a photo"
+            dynamicinfoTextView.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 10).isActive = true
+            dynamicinfoTextView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 25).isActive = true
+            
+            self.addSubview(dynamicinfoTextView2)
+            dynamicinfoTextView2.text = "Save this photo to an album in this app, or save it to your phone."
+            dynamicinfoTextView2.widthAnchor.constraint(equalToConstant: self.frame.width*0.5).isActive = true //half of frame width
+            dynamicinfoTextView2.heightAnchor.constraint(equalToConstant: self.frame.width*0.5).isActive = true //box - same as height
+            dynamicinfoTextView2.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -10).isActive = true
+            dynamicinfoTextView2.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -10).isActive = true
             break
         }
         
@@ -140,19 +172,45 @@ extension Tutorial_View {
         clearForeground.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
     }
     
-    private func setupAndAnimateArrow(){
-        self.addSubview(arrowLabel)
-        arrowLabel.widthAnchor.constraint(equalToConstant: 55).isActive = true
-        arrowLabel.heightAnchor.constraint(equalToConstant: 55).isActive = true
-        arrowLabel.rightAnchor.constraint(equalTo: self.rightAnchor, constant: 0).isActive = true
-        arrowLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 5).isActive = true
+    private func setupAndAnimateArrow(tutorialSelected: TutorialDefaults){
         
+        switch tutorialSelected {
+            
+        case .addAlbum:
+            self.addSubview(arrowLabel_UP)
+            arrowLabel_UP.widthAnchor.constraint(equalToConstant: 55).isActive = true
+            arrowLabel_UP.heightAnchor.constraint(equalToConstant: 55).isActive = true
+            arrowLabel_UP.rightAnchor.constraint(equalTo: self.rightAnchor, constant: 0).isActive = true
+            arrowLabel_UP.topAnchor.constraint(equalTo: self.topAnchor, constant: 5).isActive = true
+            
+        case .addPhotoToAlbum:
+            break
+        case .collageStart:
+            break
+        case .collageCrop:
+            break
+        case .cameraFollowUp:
+            self.addSubview(arrowLabel_UP)
+            arrowLabel_UP.widthAnchor.constraint(equalToConstant: 55).isActive = true
+            arrowLabel_UP.heightAnchor.constraint(equalToConstant: 55).isActive = true
+            arrowLabel_UP.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 5).isActive = true
+            arrowLabel_UP.topAnchor.constraint(equalTo: self.topAnchor, constant: 40).isActive = true
+            
+            self.addSubview(arrowLabel_DOWN)
+            arrowLabel_DOWN.widthAnchor.constraint(equalToConstant: 55).isActive = true
+            arrowLabel_DOWN.heightAnchor.constraint(equalToConstant: 55).isActive = true
+            arrowLabel_DOWN.rightAnchor.constraint(equalTo: self.rightAnchor, constant: 0).isActive = true
+            arrowLabel_DOWN.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -40).isActive = true
+        }
+
         //pulsate. big/small every other second
         UIView.animate(withDuration: 0.75, delay: 0, options: [.repeat, .autoreverse], animations: {
-            self.arrowLabel.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+            self.arrowLabel_UP.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+            self.arrowLabel_DOWN.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
         }) { _ in
             UIView.animate(withDuration: 0.75) {
-                self.arrowLabel.transform = CGAffineTransform.identity
+                self.arrowLabel_UP.transform = CGAffineTransform.identity
+                self.arrowLabel_DOWN.transform = CGAffineTransform.identity
             }
         }
     }

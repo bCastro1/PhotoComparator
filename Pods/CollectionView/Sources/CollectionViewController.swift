@@ -5,7 +5,7 @@
 //  Created by Tibor Bödecs on 2018. 04. 11..
 //  Copyright © 2018. Tibor Bödecs. All rights reserved.
 //
-
+#if canImport(UIKit)
 import UIKit
 
 open class CollectionViewController: UIViewController {
@@ -60,7 +60,7 @@ open class CollectionViewController: UIViewController {
      open override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.backgroundColor = .white
+        //self.view.backgroundColor = .white
 
         self.collectionView.backgroundColor = .clear
         self.collectionView.alwaysBounceVertical = true
@@ -81,13 +81,14 @@ open class CollectionViewController: UIViewController {
         super.traitCollectionDidChange(previousTraitCollection)
         
         guard
+            self.collectionView != nil,
             let previousTraitCollection = previousTraitCollection,
             self.traitCollection.verticalSizeClass != previousTraitCollection.verticalSizeClass ||
             self.traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass
         else {
             return
         }
-        
+       
         self.collectionView.collectionViewLayout.invalidateLayout()
         self.collectionView.reloadData()
     }
@@ -97,6 +98,10 @@ open class CollectionViewController: UIViewController {
         
         super.viewWillTransition(to: size, with: coordinator)
         
+        guard self.collectionView != nil else {
+            return
+        }
+
         self.collectionView.collectionViewLayout.invalidateLayout()
         self.collectionView.bounds.size = size
         
@@ -108,4 +113,4 @@ open class CollectionViewController: UIViewController {
         })
     }
 }
-
+#endif

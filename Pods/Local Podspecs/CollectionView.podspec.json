@@ -1,0 +1,26 @@
+{
+  "name": "CollectionView",
+  "version": "2.0.1",
+  "summary": "CollectionViews with ease.",
+  "description": "A view model framework around collection views.",
+  "homepage": "https://theswiftdev.com/",
+  "license": {
+    "type": "WTFPL",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "Tibor Bödecs": "mail.tib@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/CoreKit/CollectionView.git",
+    "tag": "2.0.1"
+  },
+  "social_media_url": "https://twitter.com/tiborbodecs",
+  "platforms": {
+    "ios": "11.0"
+  },
+  "swift_versions": "5.0",
+  "source_files": "Sources/**/*",
+  "frameworks": "UIKit",
+  "swift_version": "5.0"
+}

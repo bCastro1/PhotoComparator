@@ -23,7 +23,7 @@
 import Foundation
 import Photos
 
-public class AssetStore {
+@objcMembers public class AssetStore : NSObject {
     public private(set) var assets: [PHAsset]
 
     public init(assets: [PHAsset] = []) {
@@ -46,5 +46,13 @@ public class AssetStore {
     func remove(_ asset: PHAsset) {
         guard let index = assets.firstIndex(of: asset) else { return }
         assets.remove(at: index)
+    }
+    
+    func removeFirst() -> PHAsset? {
+        return assets.removeFirst()
+    }
+
+    func index(of asset: PHAsset) -> Int? {
+        return assets.firstIndex(of: asset)
     }
 }

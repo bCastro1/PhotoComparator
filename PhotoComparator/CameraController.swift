@@ -25,7 +25,8 @@ class CameraController: NSObject, AVCapturePhotoCaptureDelegate {
      var previewLayer: AVCaptureVideoPreviewLayer?
      
     var photoCaptureCompletionBlock: ((UIImage?, Error?) -> Void)?
-    
+    var zoomFactor: CGFloat = 1.0
+        
      public enum CameraPosition {
          case front
          case rear
@@ -51,6 +52,8 @@ extension CameraController {
             //self.captureSession?.sessionPreset = .photo
         }
         
+        
+        //MARK: getting devices cameras
         func configureCaptureDevices() throws {
             //finding available cameras on device
             let session = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: AVMediaType.video, position: .unspecified)
@@ -59,22 +62,24 @@ extension CameraController {
                 for camera in cameras {
                     if camera.position == .front {
                         self.frontCamera = camera
+                        
                     }
-                 
                     if camera.position == .back {
                         self.rearCamera = camera
-                 
                         try camera.lockForConfiguration()
+                        
                         camera.focusMode = .continuousAutoFocus
                         camera.unlockForConfiguration()
                     }
                 }
+                
             }
             else {
                 throw CameraControllerError.noCamerasAvailable
             }
         }
         
+        //MARK: Config cameras
         func configureDeviceInputs() throws {
             guard let captureSession = self.captureSession else { throw CameraControllerError.captureSessionIsMissing }
 
@@ -88,16 +93,18 @@ extension CameraController {
 
             else if let frontCamera = self.frontCamera {
                 self.frontCameraInput = try AVCaptureDeviceInput(device: frontCamera)
-
+                
                 if captureSession.canAddInput(self.frontCameraInput!) { captureSession.addInput(self.frontCameraInput!) }
                 else { throw CameraControllerError.inputsAreInvalid }
 
                 self.currentCameraPosition = .front
             }
-
+            
             else { throw CameraControllerError.noCamerasAvailable }
             
         }
+        
+        //MARK: Config output
         func configurePhotoOutput() throws {
            guard let captureSession = self.captureSession else { throw CameraControllerError.captureSessionIsMissing }
         
@@ -129,18 +136,22 @@ extension CameraController {
                 completionHandler(nil)
             }
         }
+        
+        
     }
     
     //MARK: Display photo preview
     func displayPreview(on view: UIView) throws {
        guard let captureSession = self.captureSession, captureSession.isRunning else { throw CameraControllerError.captureSessionIsMissing }
+    //        iv.contentMode = .scaleAspectFit
+
+        self.previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        self.previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspect
+        self.previewLayer?.connection?.videoOrientation = .portrait
     
-       self.previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        self.previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
-       self.previewLayer?.connection?.videoOrientation = .portrait
-    
-       view.layer.insertSublayer(self.previewLayer!, at: 0)
-        
+        view.layer.insertSublayer(self.previewLayer!, at: 0)
+        let pinchZoomGesture = UIPinchGestureRecognizer(target: self, action: #selector(zoom))
+        view.addGestureRecognizer(pinchZoomGesture)
         
         self.previewLayer?.frame = view.bounds
     }
@@ -218,6 +229,35 @@ extension CameraController {
             let previewImage = UIImage(data: imageData)
         self.photoCaptureCompletionBlock?(previewImage, nil)
 
+    }
+    
+    
+
+    //MARK: Zoom gesture func
+    @objc public func zoom(pinch: UIPinchGestureRecognizer) {
+        guard let device = self.rearCamera else { return }
+        func minMaxZoom(_ factor: CGFloat) -> CGFloat { return min(max(factor, 1.0), device.activeFormat.videoMaxZoomFactor) }
+
+          func update(scale factor: CGFloat) {
+            do {
+              try device.lockForConfiguration()
+              defer { device.unlockForConfiguration() }
+              device.videoZoomFactor = factor
+            } catch {
+              debugPrint(error)
+            }
+          }
+
+          let newScaleFactor = minMaxZoom(pinch.scale * zoomFactor)
+
+          switch pinch.state {
+            case .began: fallthrough
+            case .changed: update(scale: newScaleFactor)
+            case .ended:
+              zoomFactor = minMaxZoom(newScaleFactor)
+              update(scale: zoomFactor)
+            default: break
+          }
     }
 }
 

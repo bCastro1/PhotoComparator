@@ -25,13 +25,17 @@ import Photos
 
 extension ImagePickerController: AssetsViewControllerDelegate {
     func assetsViewController(_ assetsViewController: AssetsViewController, didSelectAsset asset: PHAsset) {
-        assetStore.append(asset)
+        if settings.selection.unselectOnReachingMax && assetStore.count > settings.selection.max {
+            if let first = assetStore.removeFirst() {
+                assetsViewController.unselect(asset:first)
+                imagePickerDelegate?.imagePicker(self, didDeselectAsset: first)
+            }
+        }
         updatedDoneButton()
         imagePickerDelegate?.imagePicker(self, didSelectAsset: asset)
     }
 
     func assetsViewController(_ assetsViewController: AssetsViewController, didDeselectAsset asset: PHAsset) {
-        assetStore.remove(asset)
         updatedDoneButton()
         imagePickerDelegate?.imagePicker(self, didDeselectAsset: asset)
     }
@@ -43,9 +47,5 @@ extension ImagePickerController: AssetsViewControllerDelegate {
         zoomTransitionDelegate.zoomedInView = previewViewController.imageView
         
         pushViewController(previewViewController, animated: true)
-    }
-
-    func shouldSelect(in assetsViewController: AssetsViewController) -> Bool {
-        return assetStore.count < settings.selection.max
     }
 }

@@ -9,7 +9,8 @@ target 'PhotoComparator' do
   # Pods for PhotoComparator
 
 	
-	pod 'CollectionView', '~> 2.0.0'
+	#pod 'CollectionView', '~> 2.0.0'
+	pod 'CollectionView', :git => 'https://github.com/CoreKit/CollectionView'
 	pod 'ImageScrollView', :git => 'https://github.com/huynguyencong/ImageScrollView.git'
 	pod 'BSImagePicker', :git => 'https://github.com/mikaoj/BSImagePicker.git' 
 	pod 'Google-Mobile-Ads-SDK'
